@@ -1,11 +1,15 @@
-#define _dt 0.001
-#define _MAX_WEIGHT 100000000.0
-#define _MIN_WEIGHT 100.0
-#define _START_SIZE -2.0,2.0
+#define _dt 			0.001
+#define _MEAN_WEIGHT 	10.0
+#define _SD_WEIGHT 		5.0
+#define _START_SIZE 	-2.0,2.0
+static double maxweight = 0; // gets updated with fill_Random
 
 
 #include <iostream>
 #include <math.h>
+#include <cstdio>
+#include <string>
+#include <cstdlib>
 #include <GL/glut.h>
 #include "nbody-fun.h"
 
@@ -29,10 +33,42 @@ static double zoomstep = 0.03; //zoom speed
 static double minParticle = 2.0; //Min particle size
 static double normParticle = 3.0; //norm particle size (2mx2m screen size if zoom=1)
 
+
+using namespace std;
+void printtext(int x, int y, string String)
+{
+//(x,y) is from the bottom left of the window
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(0, glutGet(GLUT_WINDOW_WIDTH), 0,glutGet(GLUT_WINDOW_WIDTH), -1.0f, 1.0f);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    glPushAttrib(GL_DEPTH_TEST);
+    glDisable(GL_DEPTH_TEST);
+    glRasterPos2i(x,y);
+    for (int i=0; i<String.size(); i++)
+    {
+        glutBitmapCharacter(GLUT_BITMAP_9_BY_15, String[i]);
+    }
+    glPopAttrib();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+}
+
 void display(void) {
 	//std::cout << simtime << std::endl;
 	step(arr1, nParticles);
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ACCUM_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+	glColor3f(1.0,0,0);
+	char str[64];
+	sprintf(str,"Zoom: %.4f   loc: %.2f:%.2f    time: %.5f", zoom, dx,dy,simtime);
+	printtext(10,10,str);
 
 	if (normParticle*zoom > minParticle)
 		glPointSize(normParticle*zoom);
@@ -41,7 +77,7 @@ void display(void) {
 	glBegin(GL_POINTS);
 
 		for (int i = 0; i < nParticles; i++) {
-			glColor3f(arr1[i].mass/_MAX_WEIGHT, 0.0, 1.0-arr1[i].mass/_MAX_WEIGHT);
+			glColor3f(arr1[i].mass/maxweight, 0.0, 1.0-arr1[i].mass/maxweight);
 			glVertex2f((arr1[i].pos.x -dx)*zoom, (arr1[i].pos.y -dy)*zoom);
 		}
 	glEnd();
@@ -59,7 +95,7 @@ void keyboard(int key, int mouse_x, int mouse_y) {
 		zoom += zoomstep * zoom;
 	}
 
-	std::cout << zoom << std::endl;
+
 }
 
 

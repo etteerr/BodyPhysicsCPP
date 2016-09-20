@@ -41,13 +41,15 @@ double force(particle &p1, particle &p2) {
 void fill_random(particle * arr, int n, double seed) {
 	std::default_random_engine gen(seed);
 	std::uniform_real_distribution<double> unifloc(_START_SIZE);
-	std::uniform_real_distribution<double> unifmass(_MIN_WEIGHT, _MAX_WEIGHT);
+	std::normal_distribution<double> unifmass(_MEAN_WEIGHT, _SD_WEIGHT);
 
 	for(int i=0; i < n; i++) {
 		arr[i] = particle();
 		arr[i].pos.x = unifloc(gen);
 		arr[i].pos.y = unifloc(gen);
-		arr[i].mass = unifmass(gen);
+		arr[i].mass = std::abs(unifmass(gen));
+		if(arr[i].mass > maxweight)
+			maxweight = arr[i].mass;
 	}
 }
 
