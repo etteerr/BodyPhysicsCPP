@@ -40,8 +40,8 @@ double force(particle &p1, particle &p2) {
 
 void fill_random(particle * arr, int n, double seed) {
 	std::default_random_engine gen(seed);
-	std::uniform_real_distribution<double> unifloc(0,0.01);
-	std::uniform_real_distribution<double> unifmass(1000.0,10000000.0);
+	std::uniform_real_distribution<double> unifloc(_START_SIZE);
+	std::uniform_real_distribution<double> unifmass(_MIN_WEIGHT, _MAX_WEIGHT);
 
 	for(int i=0; i < n; i++) {
 		arr[i] = particle();
@@ -59,8 +59,8 @@ void step(particle * state, int n) {
 			double f = force(state[i], state[j]);
 			dvec2 force = state[i].pos.direction(state[j].pos) * f; //Force and vector between particles i&j
 			//Update both i and j
-			state[i].force+= -force; //Force from i to j
-			state[j].force+= force; //inverted force from i to j (j to i as result)
+			state[i].force+= force; //Force from i to j
+			state[j].force+= -force; //inverted force from i to j (j to i as result)
 		}
 	}
 	//update pos &reset force vectors
