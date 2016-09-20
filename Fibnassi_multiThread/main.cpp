@@ -61,8 +61,6 @@ int main()
 	std::thread t4(&run, &queue);
 
 
-
-
 	t1.join();
 	t2.join();
 	t3.join();
