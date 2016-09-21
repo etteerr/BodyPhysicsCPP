@@ -1,7 +1,11 @@
-#define _dt 			0.001
-#define _MEAN_WEIGHT 	10.0
-#define _SD_WEIGHT 		5.0
-#define _START_SIZE 	-2.0,2.0
+#include <quadmath.h>
+
+#define _MEAN_WEIGHT 	100.0
+#define _SD_WEIGHT 		50.0
+#define _START_SIZE 	-0.1,0.1
+#define _dvec2_T 		__float128
+#define _dt 			(_dvec2_T)0.000001
+
 static double maxweight = 0; // gets updated with fill_Random
 
 
@@ -14,7 +18,7 @@ static double maxweight = 0; // gets updated with fill_Random
 #include "nbody-fun.h"
 
 //sim settings
-const int nParticles = 1024;
+const int nParticles = 128;
 double seed = 0;
 particle arr1[nParticles];
 double simtime = 0;
@@ -48,7 +52,7 @@ void printtext(int x, int y, string String)
     glPushAttrib(GL_DEPTH_TEST);
     glDisable(GL_DEPTH_TEST);
     glRasterPos2i(x,y);
-    for (int i=0; i<String.size(); i++)
+    for (unsigned int i=0; i<String.size(); i++)
     {
         glutBitmapCharacter(GLUT_BITMAP_9_BY_15, String[i]);
     }
@@ -143,12 +147,12 @@ int main(int narg, char** args) {
 	glViewport(0,0, 800,600);
 
 	//set output precision (cout text)
-	std::cout.precision(17);
+	std::cout.precision(32);
 	//Report simulation details
 	std::cout << "Starting simulation using:" << std::endl
 			<< "	nParticles: " << nParticles << std::endl
-			<< "	delta t:    " << _dt << std::endl
-			<< "	precision:  " << sizeof(double) << " bytes" << std::endl;
+			<< "	delta t:    " << (long double)_dt << std::endl
+			<< "	precision:  " << sizeof(_dvec2_T) << " bytes" << std::endl;
 	//Simulate
 	//for(double ctime = 0; ctime < simtime; ctime+=_dt) {
 		//step(arr1, nParticles);

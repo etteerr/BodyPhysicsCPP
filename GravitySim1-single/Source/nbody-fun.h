@@ -27,12 +27,12 @@ struct particle {
 	dvec2 pos;
 	dvec2 vel;
 	dvec2 force;
-	double mass;
+	_dvec2_T mass;
 };
 
 
 
-double force(particle &p1, particle &p2) {
+_dvec2_T force(particle &p1, particle &p2) {
 	return (G * p1.mass * p2.mass)/pow(p1.pos.distance(p2.pos) ,2);
 }
 
@@ -55,10 +55,9 @@ void fill_random(particle * arr, int n, double seed) {
 
 void step(particle * state, int n) {
 
-
 	for (int i = 0; i < n-1; i ++) { //For all except the last
 		for (int j = i+1; j < n; j++){ //For all the following i (prev where completed)
-			double f = force(state[i], state[j]);
+			_dvec2_T f = force(state[i], state[j]);
 			dvec2 force = state[i].pos.direction(state[j].pos) * f; //Force and vector between particles i&j
 			//Update both i and j
 			state[i].force+= force; //Force from i to j
