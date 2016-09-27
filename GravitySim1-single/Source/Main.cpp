@@ -3,8 +3,8 @@
 #define _MEAN_WEIGHT 	100.0
 #define _SD_WEIGHT 		50.0
 #define _START_SIZE 	-0.1,0.1
-#define _dvec2_T 		__float128
-#define _dt 			(_dvec2_T)0.000001
+#define _dvec2_T 		double//__float128
+#define _dt 			(_dvec2_T)0.001
 
 static double maxweight = 0; // gets updated with fill_Random
 
@@ -18,7 +18,7 @@ static double maxweight = 0; // gets updated with fill_Random
 #include "nbody-fun.h"
 
 //sim settings
-const int nParticles = 128;
+const int nParticles = 1024;
 double seed = 0;
 particle arr1[nParticles];
 double simtime = 0;
