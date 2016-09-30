@@ -53,6 +53,10 @@ double enbody::NbodySim::getNormalWeight() {
 }
 
 void enbody::NbodySim::setNormalWeightSD(double w) {
+	if (w>=0)
+		this->sdWeight = w;
+	else
+		this->sdWeight = -w;
 }
 
 double enbody::NbodySim::getNormalWeightSD() {
