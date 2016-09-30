@@ -65,9 +65,14 @@ double enbody::NbodySim::getNormalSize() {
 }
 
 void enbody::NbodySim::setNormalSizeSD(double w) {
+	if (w>=0)
+		this->sdSize = w;
+	else
+		this->sdSize = -w;
 }
 
 double enbody::NbodySim::getNormalSizeSD() {
+	return this->sdSize;
 }
 
 void enbody::NbodySim::addParticles(int nParticles) {
