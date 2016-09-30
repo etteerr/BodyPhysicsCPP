@@ -13,7 +13,6 @@
 
 namespace enbody {
 
-
 //IMPORTANT NOTICE:
 // ALL GETTER AND SETTER FUNCTIONS MUST USE A MUTEX LOCK
 // in Effect, the whole particle can be locked or just the variable.

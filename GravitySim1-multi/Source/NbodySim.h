@@ -15,9 +15,7 @@ namespace enbody {
 
 //Define error types
 enum errorType {
-	noError,
-	allocationError,
-	mathError
+	noError, allocationError, mathError
 };
 
 //Define error struct
@@ -36,7 +34,9 @@ public:
 	 * Allocated space increases when particles are added beyond 1024
 	 *
 	 */
-	NbodySim() { NbodySim(1024); }
+	NbodySim() {
+		NbodySim(1024);
+	}
 	/**
 	 * Initializes the simulator with an initial space of nParticles
 	 * Allocated space increases when particles exceed the current allocated space
@@ -161,7 +161,6 @@ public:
 	 */
 	void step();
 
-
 private:
 	//Particles
 	Particle* particleArrayPointer = nullptr_t;
@@ -169,11 +168,10 @@ private:
 	vec2<int> workingSector;
 
 	//Generation variables
-	double meanWeight 	= 0;
-	double sdWeight 	= 0;
-	double meanSize 	= 0;
-	double sdSize 		= 0;
-
+	double meanWeight = 0;
+	double sdWeight = 0;
+	double meanSize = 0;
+	double sdSize = 0;
 
 	//Error handling
 	Error myError = noError;

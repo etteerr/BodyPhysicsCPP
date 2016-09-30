@@ -14,4 +14,19 @@ Particle::Particle() {
 
 }
 
+void Particle::setWeight(double weight) {
+}
+
+double Particle::getWeight() {
+}
+
+void Particle::setPosition(vec2<double> pos) {
+}
+
+vec2<double> Particle::getPosition() {
+}
+
+void Particle::step() {
+}
+
 } /* namespace enbody */
