@@ -20,24 +20,48 @@ namespace enbody {
 // This remains locked across function calls
 class Particle {
 public:
-	Particle();
+	Particle(double nMass);
 
 	//Getters and setters, each with their own mutex lock or a global one..
-	void setWeight(double);
-	double getWeight();
-	void setPosition(vec2<double>);
-	vec2<double> getPosition();
+	double getMass();
+	/**
+	 * Returns relative to sector
+	 */
+	vec2<double> getPosition();	//Position is only set by this class (step and normalizePos..)
+	vec2<double> getVelocity(); //Velocity is only set by this class (step)
+	vec2<double> getForce();
+	vec2<double> getSector();
+	/**
+	 * returns relative to origin (less accurate)
+	 */
+	vec2<double> getNormPosition(); //returns
+	void setForce(vec2<double>&);
+	void setForce(double x, double y);
+	void addForce(vec2<double>&);
+	void addForce(double x, double y);
 
 	// calculates new velocity and steps position one velocity * dt
 	void step();
 
 private:
-	double weight;
+	//Variable
+	const double mass;
 	vec2<double> position;
 	vec2<double> velocity;
 	vec2<double> force;
-	vec2<int> sector;
+	vec2<double> sector;
 	//std::mutex m_lock;
+
+	//Private setters
+	void setVelocity(vec2<double>&);
+	void addVelocity(vec2<double>&);
+
+	//private fun
+	/**
+	 * Updates the relative position in the sector and the sector position
+	 * Warning: No mutex locks used in this function, manual locks required
+	 */
+	void normalizePosition(); //Devides in sectors
 };
 
 } /* namespace enbody */

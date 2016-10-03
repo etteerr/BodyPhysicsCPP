@@ -6,27 +6,148 @@
  */
 
 #include "Particle.h"
+#include "NbodySim.h"
+#define G 0.0000000000667
 
 namespace enbody {
 
-Particle::Particle() {
-	// TODO Auto-generated constructor stub
 
+std::mutex vwrite;
+std::mutex pwrite;
+std::mutex fwrite;
+
+Particle::Particle(double nMass)
+:	mass(nMass)
+	{
+	pwrite = std::mutex();
+	fwrite = std::mutex();
+	vwrite = std::mutex();
 }
 
-void Particle::setWeight(double weight) {
-}
-
-double Particle::getWeight() {
-}
-
-void Particle::setPosition(vec2<double> pos) {
+double Particle::getMass() {
+	return mass;
 }
 
 vec2<double> Particle::getPosition() {
+	double tmp;
+	pwrite.lock(); //Lock to prevent writing
+	tmp = this->position;
+	pwrite.unlock();
+	return tmp;
 }
 
+
+
 void Particle::step() {
+	// Lock all variable to prevent strange shit
+	pwrite.lock();
+	fwrite.lock();
+
+	//Do step
+	{
+		//update velocity vector
+		velocity += (force * NbodySim::deltaT)/mass;
+		//Update pos
+		position += velocity * NbodySim::deltaT;
+		//reset force
+		this->setForce(0,0);
+		//Normalize position
+		normalizePosition();
+	}
+
+	pwrite.unlock();
+	fwrite.unlock();
+
+	return;
+}
+
+
+vec2<double> Particle::getVelocity() {
+	vwrite.lock();
+	vec2<double> tmp = this->velocity;
+	vwrite.unlock();
+	return tmp;
+
+}
+
+vec2<double> Particle::getForce() {
+	fwrite.lock();
+	vec2<double> tmp = this->getForce();
+	fwrite.unlock();
+	return tmp;
+}
+
+void Particle::setForce(vec2<double>& nForce) {
+	fwrite.lock();
+	this->force = nForce;
+	fwrite.unlock();
+}
+
+void Particle::addForce(vec2<double>& aForce) {
+	fwrite.lock();
+	this->force+= aForce;
+	fwrite.unlock();
+}
+
+//Private
+void Particle::setVelocity(vec2<double>& vel) {
+	vwrite.lock();
+	this->velocity = vel;
+	vwrite.unlock();
+}
+
+void Particle::setForce(double x, double y) {
+	fwrite.lock();
+	this->force.x = x;
+	this->force.y = y;
+	fwrite.unlock();
+}
+
+//Private
+void Particle::addVelocity(vec2<double>& vel) {
+	vwrite.lock();
+	this->velocity+= vel;
+	vwrite.unlock();
+}
+
+vec2<double> Particle::getSector() {
+	vec2<double> tmp;
+	pwrite.lock();
+	tmp = sector;
+	pwrite.unlock();
+	return tmp;
+}
+
+vec2<double> Particle::getNormPosition() {
+	vec2<double>tmp;
+	pwrite.lock();
+	tmp = sector;
+	tmp += position;
+	pwrite.unlock();
+	return tmp;
+}
+
+void Particle::addForce(double x, double y) {
+	fwrite.lock();
+	force+=vec2<double>(x,y);
+	fwrite.unlock();
+}
+
+void Particle::normalizePosition() {
+	if (position.x >= 1){
+		position.x--;
+		sector.x++;
+	}else if (position.x < 0) {
+		position.x++;
+		sector.x--;
+	}
+	if (position.y >= 1){
+		position.y--;
+		sector.y++;
+	}else if (position.y < 0) {
+		position.y++;
+		sector.y--;
+	}
 }
 
 } /* namespace enbody */
