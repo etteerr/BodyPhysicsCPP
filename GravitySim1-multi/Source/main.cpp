@@ -77,6 +77,12 @@ void mouse(int button, int state, int x, int y) {
 }
 
 int main(int narg, char** args) {
+	//init sim
+	//TODO: commandline init with variables
+	//	spread from origin (mean=0, alpha=?)
+	//	mean mass
+	//  sd mass
+	// nparticles
 
 	//Init openGL
 	glutInit(&narg, args);
