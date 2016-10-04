@@ -28,7 +28,10 @@ struct Error {
 
 class NbodySim {
 public:
-	static double deltaT;
+
+	// Simulation Parameters
+	static double deltaT = 0;
+
 	/**
 	 * Initializes the simulator with an initial space of 1024 particles
 	 * Allocated space increases when particles are added beyond 1024
@@ -98,15 +101,11 @@ public:
 	 * Sets the mean for the normal weight distribution
 	 * This is than used for the following particle generation calls
 	 */
-	void setNormalWeight(double w);
+	void setNormalWeight(double w, double s);
 	/**
 	 * Gets the mean used for random particle weights
 	 */
 	double getNormalWeight();
-	/**
-	 * Sets the sd for particle weight generation
-	 */
-	void setNormalWeightSD(double w);
 	/**
 	 * Gets the sd for particle weight generation
 	 */
@@ -117,15 +116,11 @@ public:
 	 * Sets the mean for the normal size distribution
 	 * This is than used for the following particle generation calls
 	 */
-	void setNormalSize(double w);
+	void setNormalSize(double w, double s);
 	/**
 	 * Gets the mean used for random particle sizes
 	 */
 	double getNormalSize();
-	/**
-	 * Sets the sd for particle size generation
-	 */
-	void setNormalSizeSD(double w);
 	/**
 	 * Gets the sd for particle size generation
 	 */
