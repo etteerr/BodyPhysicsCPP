@@ -159,6 +159,12 @@ double enbody::NbodySim::getNormalSizeSD() {
 }
 
 void enbody::NbodySim::addParticles(int nParticles) {
+
+	if (getFreeSpace() < nParticles)
+		increaseAlloc(nParticles - getFreeSpace());
+
+	//Add particles
+
 }
 
 void enbody::NbodySim::addParticles(vec2<double> min, vec2<double> max,
@@ -166,10 +172,10 @@ void enbody::NbodySim::addParticles(vec2<double> min, vec2<double> max,
 }
 
 void enbody::NbodySim::addParticle(Particle particle) {
-	if (freeSpacePointer == particleArraySize-1)
+	if (getFreeSpace() == 0)
 		increaseAlloc(10);
 
-	if (freeSpacePointer <=  particleArraySize)
+	if (getFreeSpace() > 0)
 		particleArrayPointer[freeSpacePointer++] = particle;
 	else
 		setError(memoryError, "No free memory available");
