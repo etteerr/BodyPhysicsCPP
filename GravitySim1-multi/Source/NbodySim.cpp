@@ -34,10 +34,10 @@ void enbody::NbodySim::printError() {
 bool enbody::NbodySim::initAlloc(int n) {
 	//Alloc space and set (rel)pointer to 0
 	try {
-		particleArrayPointer = (Particle *) malloc(sizeof(Particle)*n);
+		particleArrayPointer = (Particle *) malloc(sizeof(Particle) * n);
 		particleBufferSize = n;
 		freeSpacePointer = 0;
-	}catch(std::exception* e) {
+	} catch (std::exception* e) {
 		//TODO: Exception handeling
 		throw *e;
 		return false;
@@ -47,7 +47,8 @@ bool enbody::NbodySim::initAlloc(int n) {
 }
 
 bool enbody::NbodySim::increaseAlloc(int n) {
-	Particle *newPointer = (Particle *) realloc(particleArrayPointer, sizeof(Particle)*(particleBufferSize+n));
+	Particle *newPointer = (Particle *) realloc(particleArrayPointer,
+			sizeof(Particle) * (particleBufferSize + n));
 	if (newPointer != NULL) {
 		particleBufferSize += n;
 		particleArrayPointer = newPointer;
@@ -61,16 +62,17 @@ bool enbody::NbodySim::increaseAlloc(int n) {
 }
 
 bool enbody::NbodySim::decreaseAlloc(int n) {
-	if (freeSpacePointer >= (particleBufferSize - n)){
+	if (freeSpacePointer >= (particleBufferSize - n)) {
 		setError(deallocationError, "Memory to deallocate is in use.");
 		return false;
 	}
 
 	//Realloc memory (now -n)
-	Particle *newPointer = (Particle *) realloc(particleArrayPointer, sizeof(Particle)*(particleBufferSize - n));
+	Particle *newPointer = (Particle *) realloc(particleArrayPointer,
+			sizeof(Particle) * (particleBufferSize - n));
 
 	//If it worked
-	if (newPointer !=NULL) {
+	if (newPointer != NULL) {
 		particleBufferSize -= n;
 		if (freeSpacePointer == particleBufferSize)
 			freeSpacePointer--;
@@ -81,7 +83,6 @@ bool enbody::NbodySim::decreaseAlloc(int n) {
 	setError(allocationError, "de- and re-allocation failed.");
 	return false;
 }
-
 
 void NbodySim::freeAllocatedMemory() {
 	free(particleArrayPointer);
@@ -155,10 +156,9 @@ void enbody::NbodySim::deleteParticles(int index) {
 void enbody::NbodySim::step() {
 }
 
-void NbodySim::_setError(Error err, std::string message, int line, std::string file) {
+void NbodySim::_setError(Error err, std::string message, int line,
+		std::string file) {
 }
 
-
-}//Namespace
-
+} //Namespace
 

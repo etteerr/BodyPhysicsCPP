@@ -11,14 +11,12 @@
 
 namespace enbody {
 
-
 std::mutex vwrite;
 std::mutex pwrite;
 std::mutex fwrite;
 
-Particle::Particle(double nMass)
-:	mass(nMass)
-	{
+Particle::Particle(double nMass) :
+		mass(nMass) {
 	pwrite = std::mutex();
 	fwrite = std::mutex();
 	vwrite = std::mutex();
@@ -36,8 +34,6 @@ vec2<double> Particle::getPosition() {
 	return tmp;
 }
 
-
-
 void Particle::step() {
 	// Lock all variable to prevent strange shit
 	pwrite.lock();
@@ -46,11 +42,11 @@ void Particle::step() {
 	//Do step
 	{
 		//update velocity vector
-		velocity += (force * NbodySim::deltaT)/mass;
+		velocity += (force * NbodySim::deltaT) / mass;
 		//Update pos
 		position += velocity * NbodySim::deltaT;
 		//reset force
-		this->setForce(0,0);
+		this->setForce(0, 0);
 		//Normalize position
 		normalizePosition();
 	}
@@ -60,7 +56,6 @@ void Particle::step() {
 
 	return;
 }
-
 
 vec2<double> Particle::getVelocity() {
 	vwrite.lock();
@@ -85,7 +80,7 @@ void Particle::setForce(vec2<double>& nForce) {
 
 void Particle::addForce(vec2<double>& aForce) {
 	fwrite.lock();
-	this->force+= aForce;
+	this->force += aForce;
 	fwrite.unlock();
 }
 
@@ -106,7 +101,7 @@ void Particle::setForce(double x, double y) {
 //Private
 void Particle::addVelocity(vec2<double>& vel) {
 	vwrite.lock();
-	this->velocity+= vel;
+	this->velocity += vel;
 	vwrite.unlock();
 }
 
@@ -119,7 +114,7 @@ vec2<double> Particle::getSector() {
 }
 
 vec2<double> Particle::getNormPosition() {
-	vec2<double>tmp;
+	vec2<double> tmp;
 	pwrite.lock();
 	tmp = sector;
 	tmp += position;
@@ -129,22 +124,22 @@ vec2<double> Particle::getNormPosition() {
 
 void Particle::addForce(double x, double y) {
 	fwrite.lock();
-	force+=vec2<double>(x,y);
+	force += vec2<double>(x, y);
 	fwrite.unlock();
 }
 
 void Particle::normalizePosition() {
-	if (position.x >= 1){
+	if (position.x >= 1) {
 		position.x--;
 		sector.x++;
-	}else if (position.x < 0) {
+	} else if (position.x < 0) {
 		position.x++;
 		sector.x--;
 	}
-	if (position.y >= 1){
+	if (position.y >= 1) {
 		position.y--;
 		sector.y++;
-	}else if (position.y < 0) {
+	} else if (position.y < 0) {
 		position.y++;
 		sector.y--;
 	}
