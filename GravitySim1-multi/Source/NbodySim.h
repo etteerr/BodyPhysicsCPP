@@ -42,7 +42,7 @@ public:
 	 * Initializes the simulator with an initial space of nParticles
 	 * Allocated space increases when particles exceed the current allocated space
 	 */
-	NbodySim(int nParticles);
+	NbodySim(unsigned int nParticles);
 	/**
 	 * Safely destroys the allocated particle space and handles other stuff
 	 */

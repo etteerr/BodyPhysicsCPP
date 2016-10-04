@@ -8,7 +8,7 @@
 #include "NbodySim.h"
 #include <stdlib.h>;
 namespace enbody {
-enbody::NbodySim::NbodySim(int nParticles) {
+enbody::NbodySim::NbodySim(unsigned int nParticles) {
 	initAlloc(nParticles);
 	resetError();
 }
