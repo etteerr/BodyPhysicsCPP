@@ -51,6 +51,7 @@ public:
 	Error getError();
 	bool hadError();
 	void printError();
+	void resetError();
 
 //Space management
 	/**

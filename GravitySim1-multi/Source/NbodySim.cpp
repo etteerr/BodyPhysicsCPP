@@ -10,6 +10,7 @@
 namespace enbody {
 enbody::NbodySim::NbodySim(int nParticles) {
 	initAlloc(nParticles);
+	resetError();
 }
 
 enbody::NbodySim::~NbodySim() {
@@ -19,7 +20,12 @@ enbody::NbodySim::~NbodySim() {
 Error enbody::NbodySim::getError() {
 }
 
+void NbodySim::resetError() {
+	myError = myError();
+	myError.error = noError;
+}
 bool enbody::NbodySim::hadError() {
+	return myError.error != noError;
 }
 
 void enbody::NbodySim::printError() {
