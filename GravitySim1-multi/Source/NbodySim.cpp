@@ -35,15 +35,19 @@ bool enbody::NbodySim::cleanAlloc(int n) {
 }
 
 void enbody::NbodySim::setDT(double dt) {
+	this->deltaT = dt;
 }
 
 double enbody::NbodySim::getDT() {
+	return this->deltaT;
 }
 
 void enbody::NbodySim::setWorkingSector(vec2<int> sector) {
+	this->workingSector = sector;
 }
 
 vec2<int> enbody::NbodySim::getWorkingSector() {
+	return this->workingSector;
 }
 
 void enbody::NbodySim::setNormalWeight(double w, double s) {
