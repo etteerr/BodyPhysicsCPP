@@ -152,14 +152,14 @@ public:
 	 * Particle particle is added at position pos and sector 'workingSector'
 	 * Idem for size
 	 */
-	void addParticle(vec2<double> pos, Particle particle);
+	void addParticle(Particle particle);
 //delete particle
 	/**
-	 * deleteParticle(n)
+	 * deleteParticles(n)
 	 * deletes particle on index n
 	 * use memmove to shift array to left, keep freespace right
 	 */
-	void deleteParticle(int n);
+	void deleteParticles(int n);
 
 //Step
 	/**

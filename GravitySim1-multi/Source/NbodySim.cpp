@@ -149,10 +149,10 @@ void enbody::NbodySim::addParticles(vec2<double> min, vec2<double> max,
 		int nParticles) {
 }
 
-void enbody::NbodySim::addParticle(vec2<double> pos, Particle particle) {
+void enbody::NbodySim::addParticle(Particle particle) {
 }
 
-void enbody::NbodySim::deleteParticle(int index) {
+void enbody::NbodySim::deleteParticles(int index) {
 }
 
 void enbody::NbodySim::step() {
