@@ -77,6 +77,12 @@ public:
 	 */
 	bool cleanAlloc(int n);
 
+	/**
+	 *
+	 * Free all allocated memory (del all :))
+	 */
+	void freeAllocatedMemory();
+
 //stepsize / precision
 	void setDT(double dt);
 	double getDT();
@@ -162,7 +168,7 @@ public:
 	void step();
 
 private:
-	//Particles
+	//Particles (memory and current working stuff)
 	Particle* particleArrayPointer = nullptr_t;
 	unsigned int nParticles = 0;
 	unsigned int particleBufferSize;

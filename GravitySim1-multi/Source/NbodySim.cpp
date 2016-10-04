@@ -13,6 +13,7 @@ enbody::NbodySim::NbodySim(int nParticles) {
 }
 
 enbody::NbodySim::~NbodySim() {
+	freeAllocatedMemory();
 }
 
 Error enbody::NbodySim::getError() {
@@ -44,7 +45,7 @@ bool enbody::NbodySim::increaseAlloc(int n) {
 	if (newPointer != NULL) {
 		particleBufferSize += n;
 		particleArrayPointer = newPointer;
-		return true
+		return true;
 	}
 
 	//Allocation failed, old pointer is still valid.
@@ -73,6 +74,14 @@ bool enbody::NbodySim::decreaseAlloc(int n) {
 	//Alloc failed
 	setError(allocationError, "de- and re-allocation failed.");
 	return false;
+}
+
+
+void NbodySim::freeAllocatedMemory() {
+	free(particleArrayPointer);
+	freeSpacePointer = 0;
+	particleBufferSize = 0;
+	nParticles = 0;
 }
 
 /**
