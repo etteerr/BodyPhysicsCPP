@@ -46,33 +46,26 @@ void enbody::NbodySim::setWorkingSector(vec2<int> sector) {
 vec2<int> enbody::NbodySim::getWorkingSector() {
 }
 
-void enbody::NbodySim::setNormalWeight(double w) { meanWeight = w;
+void enbody::NbodySim::setNormalWeight(double w, double s) {
+	this->meanWeight = w;
+	this->sdWeight = s;
 }
 
-double enbody::NbodySim::getNormalWeight() { return meanWeight;
-}
-
-void enbody::NbodySim::setNormalWeightSD(double w) {
-	if (w>=0)
-		this->sdWeight = w;
-	else
-		this->sdWeight = -w;
+double enbody::NbodySim::getNormalWeight() {
+	return this->meanWeight;
 }
 
 double enbody::NbodySim::getNormalWeightSD() {
+	return this->sdWeight;
 }
 
-void enbody::NbodySim::setNormalSize(double w) {
+void enbody::NbodySim::setNormalSize(double w, double s) {
+	this->meanSize = w;
+	this->sdSize = s;
 }
 
 double enbody::NbodySim::getNormalSize() {
-}
-
-void enbody::NbodySim::setNormalSizeSD(double w) {
-	if (w>=0)
-		this->sdSize = w;
-	else
-		this->sdSize = -w;
+	return this->meanSize;
 }
 
 double enbody::NbodySim::getNormalSizeSD() {
