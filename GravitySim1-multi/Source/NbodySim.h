@@ -172,7 +172,7 @@ private:
 	Particle* particleArrayPointer = nullptr_t;
 	unsigned int nParticles = 0;
 	unsigned int particleArraySize;
-	unsigned int freeSpacePointer = 0;
+	unsigned int freeSpacePointer = 0; //Points to the first free space in particleArray
 	vec2<int> workingSector;
 
 	//Generation variables
