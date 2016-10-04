@@ -166,6 +166,13 @@ void enbody::NbodySim::addParticles(vec2<double> min, vec2<double> max,
 }
 
 void enbody::NbodySim::addParticle(Particle particle) {
+	if (freeSpacePointer == particleBufferSize-1)
+		increaseAlloc(10);
+
+	if (freeSpacePointer <=  particleBufferSize)
+		particleArrayPointer[freeSpacePointer++] = particle;
+	else
+		setError(memoryError, "No free memory available");
 }
 
 void enbody::NbodySim::deleteParticles(int index) {

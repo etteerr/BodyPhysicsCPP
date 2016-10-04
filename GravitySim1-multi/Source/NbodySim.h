@@ -15,7 +15,7 @@ namespace enbody {
 
 //Define error types
 enum errorType {
-	noError, allocationError, deallocationError, mathError
+	noError, allocationError, deallocationError, mathError, memoryError
 };
 
 //Define error struct
