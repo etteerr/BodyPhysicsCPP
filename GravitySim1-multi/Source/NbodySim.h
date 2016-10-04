@@ -15,7 +15,7 @@ namespace enbody {
 
 //Define error types
 enum errorType {
-	noError, allocationError, mathError
+	noError, allocationError, deallocationError, mathError
 };
 
 //Define error struct
@@ -28,7 +28,7 @@ struct Error {
 
 class NbodySim {
 public:
-
+	static double deltaT;
 	/**
 	 * Initializes the simulator with an initial space of 1024 particles
 	 * Allocated space increases when particles are added beyond 1024
@@ -164,7 +164,9 @@ public:
 private:
 	//Particles
 	Particle* particleArrayPointer = nullptr_t;
-	int nParticles = 0;
+	unsigned int nParticles = 0;
+	unsigned int particleBufferSize;
+	unsigned int freeSpacePointer = 0;
 	vec2<int> workingSector;
 
 	//Generation variables
@@ -175,8 +177,8 @@ private:
 
 	//Error handling
 	Error myError = noError;
-#define setError(E) _setError(E, __LINE__, __FILE__)
-	void _setError(Error, int line, std::string file);
+#define setError(E,M) _setError((Error)E,std::string(M), int(__LINE__), std::string(__FILE__))
+	void _setError(Error,std::string message, int line, std::string file);
 };
 
 }
