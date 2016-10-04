@@ -191,5 +191,29 @@ void NbodySim::_setError(Error err, std::string message, int line,
 		std::string file) {
 }
 
+/**
+ * Iterator functions
+ * Example:
+ * nbody.iteratorInit()
+ * while(nbody.iteratorHasNext())
+ * 		Particle * p = nbody.iteratorNext()
+ *
+ */
+void NbodySim::iteratorInit() {
+	iterPointer = 0;
+}
+
+Particle* NbodySim::iteratorNext() {
+	if (iterPointer < 0 || iterPointer >= (nParticles-1))
+		return -1;
+
+	return &particleArrayPointer[iterPointer++];
+}
+
+bool NbodySim::iteratorHasNext() {
+	return (iterPointer > 0 && iterPointer < (nParticles-1));
+}
+
+
 } //Namespace
 

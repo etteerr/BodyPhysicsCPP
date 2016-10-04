@@ -167,6 +167,24 @@ public:
 	 */
 	void step();
 
+//Iterator
+	/**
+	 * iteratorInit
+	 * 	Reset the iterator to the start of the particle array
+	 */
+	void iteratorInit();
+	/**
+	 * iteratorNext
+	 * 	moves to the next particle and returns a pointer to that particle
+	 * 	returns -1 if no further particles are available
+	 */
+	Particle* iteratorNext();
+	/**
+	 * iteratorHasNext
+	 * 	returns true if further particles are available
+	 */
+	bool iteratorHasNext();
+
 private:
 	//Particles (memory and current working stuff)
 	Particle* particleArrayPointer = nullptr_t;
@@ -185,6 +203,9 @@ private:
 	Error myError = noError;
 #define setError(E,M) _setError((Error)E,std::string(M), int(__LINE__), std::string(__FILE__))
 	void _setError(Error,std::string message, int line, std::string file);
+
+	//Iterator
+	unsigned int iterPointer = 0;
 };
 
 }
