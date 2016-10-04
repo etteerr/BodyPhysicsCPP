@@ -40,7 +40,7 @@ bool enbody::NbodySim::initAlloc(unsigned int n) {
 	//Alloc space and set (rel)pointer to 0
 	try {
 		particleArrayPointer = (Particle *) malloc(sizeof(Particle) * n);
-		particleBufferSize = n;
+		particleArraySize = n;
 		freeSpacePointer = 0;
 	} catch (std::exception* e) {
 		//TODO: Exception handeling
@@ -53,9 +53,9 @@ bool enbody::NbodySim::initAlloc(unsigned int n) {
 
 bool enbody::NbodySim::increaseAlloc(unsigned int n) {
 	Particle *newPointer = (Particle *) realloc(particleArrayPointer,
-			sizeof(Particle) * (particleBufferSize + n));
+			sizeof(Particle) * (particleArraySize + n));
 	if (newPointer != NULL) {
-		particleBufferSize += n;
+		particleArraySize += n;
 		particleArrayPointer = newPointer;
 		return true;
 	}
@@ -67,19 +67,19 @@ bool enbody::NbodySim::increaseAlloc(unsigned int n) {
 }
 
 bool enbody::NbodySim::decreaseAlloc(unsigned int n) {
-	if (freeSpacePointer >= (particleBufferSize - n)) {
+	if (freeSpacePointer >= (particleArraySize - n)) {
 		setError(deallocationError, "Memory to deallocate is in use.");
 		return false;
 	}
 
 	//Realloc memory (now -n)
 	Particle *newPointer = (Particle *) realloc(particleArrayPointer,
-			sizeof(Particle) * (particleBufferSize - n));
+			sizeof(Particle) * (particleArraySize - n));
 
 	//If it worked
 	if (newPointer != NULL) {
-		particleBufferSize -= n;
-		if (freeSpacePointer == particleBufferSize)
+		particleArraySize -= n;
+		if (freeSpacePointer == particleArraySize)
 			freeSpacePointer--;
 		return true;
 	}
@@ -92,13 +92,13 @@ bool enbody::NbodySim::decreaseAlloc(unsigned int n) {
 void NbodySim::freeAllocatedMemory() {
 	free(particleArrayPointer);
 	freeSpacePointer = 0;
-	particleBufferSize = 0;
+	particleArraySize = 0;
 	nParticles = 0;
 }
 
 
 unsigned int NbodySim::getFreeSpace() {
-	return (unsigned int) (particleBufferSize - freeSpacePointer)-1;
+	return (unsigned int) (particleArraySize - freeSpacePointer)-1;
 }
 
 /**
@@ -166,10 +166,10 @@ void enbody::NbodySim::addParticles(vec2<double> min, vec2<double> max,
 }
 
 void enbody::NbodySim::addParticle(Particle particle) {
-	if (freeSpacePointer == particleBufferSize-1)
+	if (freeSpacePointer == particleArraySize-1)
 		increaseAlloc(10);
 
-	if (freeSpacePointer <=  particleBufferSize)
+	if (freeSpacePointer <=  particleArraySize)
 		particleArrayPointer[freeSpacePointer++] = particle;
 	else
 		setError(memoryError, "No free memory available");

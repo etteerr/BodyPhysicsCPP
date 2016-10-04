@@ -171,7 +171,7 @@ private:
 	//Particles (memory and current working stuff)
 	Particle* particleArrayPointer = nullptr_t;
 	unsigned int nParticles = 0;
-	unsigned int particleBufferSize;
+	unsigned int particleArraySize;
 	unsigned int freeSpacePointer = 0;
 	vec2<int> workingSector;
 
