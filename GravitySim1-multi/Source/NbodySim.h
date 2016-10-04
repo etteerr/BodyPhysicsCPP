@@ -37,9 +37,7 @@ public:
 	 * Allocated space increases when particles are added beyond 1024
 	 *
 	 */
-	NbodySim() {
-		NbodySim(1024);
-	}
+	NbodySim();
 	/**
 	 * Initializes the simulator with an initial space of nParticles
 	 * Allocated space increases when particles exceed the current allocated space

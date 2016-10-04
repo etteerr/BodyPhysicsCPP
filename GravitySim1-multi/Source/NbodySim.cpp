@@ -13,6 +13,11 @@ enbody::NbodySim::NbodySim(int nParticles) {
 	resetError();
 }
 
+NbodySim::NbodySim() {
+	initAlloc(1024);
+	resetError();
+}
+
 enbody::NbodySim::~NbodySim() {
 	freeAllocatedMemory();
 }
