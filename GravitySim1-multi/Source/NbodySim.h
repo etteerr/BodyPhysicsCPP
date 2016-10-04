@@ -60,30 +60,36 @@ public:
 	 * returns true on succes and false on fail
 	 * On false, error can be found with getError();
 	 */
-	bool initAlloc(int n);
+	bool initAlloc(unsigned int n);
 	/**
 	 * Increases current allocated space with n
 	 * on false, errors can be found with getError();
 	 */
-	bool increaseAlloc(int n);
+	bool increaseAlloc(unsigned int n);
 	/**
 	 * decreases allocation by n spaces
 	 * on error, error is found with get error
 	 */
-	bool decreaseAlloc(int n);
+	bool decreaseAlloc(unsigned int n);
 	/**
 	 * cleanAlloc
 	 * Clean allocated space by deleting unused allocated space
 	 * Leaves n empty entries
 	 * (use std::memmove)
 	 */
-	bool cleanAlloc(int n);
+	bool cleanAlloc(unsigned int n);
 
 	/**
 	 *
 	 * Free all allocated memory (del all :))
 	 */
 	void freeAllocatedMemory();
+
+	/**
+	 * getFreeSpace
+	 * Returns amount of slots left for particles
+	 */
+	unsigned int getFreeSpace();
 
 //stepsize / precision
 	void setDT(double dt);

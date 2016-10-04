@@ -36,7 +36,7 @@ bool enbody::NbodySim::hadError() {
 void enbody::NbodySim::printError() {
 }
 
-bool enbody::NbodySim::initAlloc(int n) {
+bool enbody::NbodySim::initAlloc(unsigned int n) {
 	//Alloc space and set (rel)pointer to 0
 	try {
 		particleArrayPointer = (Particle *) malloc(sizeof(Particle) * n);
@@ -51,7 +51,7 @@ bool enbody::NbodySim::initAlloc(int n) {
 	return true;
 }
 
-bool enbody::NbodySim::increaseAlloc(int n) {
+bool enbody::NbodySim::increaseAlloc(unsigned int n) {
 	Particle *newPointer = (Particle *) realloc(particleArrayPointer,
 			sizeof(Particle) * (particleBufferSize + n));
 	if (newPointer != NULL) {
@@ -66,7 +66,7 @@ bool enbody::NbodySim::increaseAlloc(int n) {
 
 }
 
-bool enbody::NbodySim::decreaseAlloc(int n) {
+bool enbody::NbodySim::decreaseAlloc(unsigned int n) {
 	if (freeSpacePointer >= (particleBufferSize - n)) {
 		setError(deallocationError, "Memory to deallocate is in use.");
 		return false;
@@ -96,11 +96,24 @@ void NbodySim::freeAllocatedMemory() {
 	nParticles = 0;
 }
 
+
+unsigned int NbodySim::getFreeSpace() {
+	return (unsigned int) (particleBufferSize - freeSpacePointer)-1;
+}
+
 /**
- * iterate all items and remove freespace (shift items)
+ * removes excess free memory until at max n particles of free space is left
+ * Does not allocate more memory!!
  */
-bool enbody::NbodySim::cleanAlloc(int n) {
-	throw std::exception("Unimplemented function");
+bool enbody::NbodySim::cleanAlloc(unsigned int n) {
+	if (getFreeSpace() <= n)
+		return true;
+
+	//excessSpace is freeSpace - wantedSpace
+	unsigned int excessSpace = getFreeSpace() - n;
+
+	//Dealloc space and return result
+	return decreaseAlloc(excessSpace);
 }
 
 void enbody::NbodySim::setDT(double dt) {
