@@ -98,6 +98,7 @@ public:
 
 //Sets/gets the current working sector
 	void setWorkingSector(vec2<int> sector);
+	void setWorkingSector(int x, int y);
 	vec2<int> getWorkingSector();
 
 //Set/gets global weight and sd for generation
@@ -160,12 +161,50 @@ public:
 	 */
 	void deleteParticles(int n);
 
-//Step
 	/**
-	 * step makes the transition from state n to state n+1
-	 * with stepsize dt
+	 * startSimulation
+	 * 	start a threaded simulation using as many threads as cores
+	 * 	initIterator creates a copy
 	 */
-	void step();
+	void startSimulation();
+
+	/**
+	 * setRealtimeFraction(x)
+	 * 	sets the max simulation speed based on real time.
+	 * 	If the step duration < sim-dt, delay/sleep will fill the remaining time.
+	 * 	The fraction sets the speed relative to real time (eg. 2.0 means 2x faster than normal time)
+	 * 	If fraction == 0, simulation is paused (results in pauseSimulation() call)
+	 * 	If fraction < 0, no sleep/delay is used and simulation will run fullspeed
+	 * 	setting fraction from 0 to non-zero will results in a resumeSimulation(x) call.
+	 * 	example
+	 * 		-dt:	0.1
+	 * 		fraction:1.0
+	 * 		-start: 0.0
+	 * 		simulation-step
+	 * 		-end:	0.01
+	 * 		-delay: (dt/fraction)-(end-start)
+	 * 		sleep() when delay > 0
+	 *
+	 */
+	void setRealtimeFraction(double x);
+
+	/**
+	 * pauseSimulation()
+	 * 	sets realtime fraction to 0
+	 * 	Saves current realtime fraction to variable
+	 * 	Note: Simulation is paused After finishing its current step
+	 * 		  But before its sleep delay if fraction > 0
+	 */
+	void pauseSimulation();
+
+	/**
+	 * resumeSimulation()
+	 * 	restores prev value of realtimeFraction
+	 * resumeSimulation(x)
+	 * 	resumes simulation with realtimeFraction x
+	 */
+	void resumeSimulation();
+	void resumeSimulation(double x);
 
 private:
 	//Particles (memory and current working stuff)
@@ -181,10 +220,17 @@ private:
 	double meanSize = 0;
 	double sdSize = 0;
 
+//Step
+	/**
+	 * step makes the transition from state n to state n+1
+	 * with stepsize dt
+	 */
+	void step();
+
 	//Error handling
 	Error myError = noError;
 #define setError(E,M) _setError((Error)E,std::string(M), int(__LINE__), std::string(__FILE__))
-	void _setError(Error,std::string message, int line, std::string file);
+	void _setError(Error, std::string message, int line, std::string file);
 };
 
 }

@@ -1,6 +1,10 @@
 #include <GL/freeglut_std.h>
 #include <GL/gl.h>
 #include <string>
+#include "NbodySim.h"
+
+//Simulator
+enbody::NbodySim simulator;
 
 //mouse move variables and setting
 static int sx;
@@ -83,6 +87,24 @@ int main(int narg, char** args) {
 	//	mean mass
 	//  sd mass
 	// nparticles
+	if (narg !=  5) {
+		cout << "Using default values..." << endl
+			 << "Use GravitySim1-multi [spread] [meanMass] [sdMass] [nParticles]" << endl
+			 << "[spread] = 0.0 0.0 1.0 1.0		Means from (0,0) to (1,1) particles may appear" << endl
+			 << "[meanMass] = 10.0  		    Means mass is 10.0 +- sdMass" << endl
+			 << "[sdMass] = 5.0					Means see [meanMass]" << endl
+			 << "[nParticles] = 1024			Means amount of particles to generate" << endl;
+		//Init default
+		simulator = enbody::NbodySim(1024);
+		simulator.setDT(0.01);
+		simulator.setNormalSize(0.1, 0.05);
+		simulator.setNormalWeight(5.0, 1.0);
+		simulator.setWorkingSector(0,0);
+		simulator.addParticles(1024);
+
+
+	}else
+		return 1;
 
 	//Init openGL
 	glutInit(&narg, args);

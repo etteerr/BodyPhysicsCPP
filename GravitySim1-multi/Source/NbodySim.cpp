@@ -8,6 +8,11 @@
 #include "NbodySim.h"
 #include <stdlib.h>;
 namespace enbody {
+
+/************************************
+ *  Constructor / Deconstructor
+ ************************************/
+
 enbody::NbodySim::NbodySim(unsigned int nParticles) {
 	initAlloc(nParticles);
 	resetError();
@@ -22,20 +27,11 @@ enbody::NbodySim::~NbodySim() {
 	freeAllocatedMemory();
 }
 
-Error enbody::NbodySim::getError() {
-}
 
-void NbodySim::resetError() {
-	myError = myError();
-	myError.error = noError;
-}
-bool enbody::NbodySim::hadError() {
-	return myError.error != noError;
-}
 
-void enbody::NbodySim::printError() {
-}
-
+/************************************
+ *  Memory Control
+ ************************************/
 bool enbody::NbodySim::initAlloc(unsigned int n) {
 	//Alloc space and set (rel)pointer to 0
 	try {
@@ -116,6 +112,10 @@ bool enbody::NbodySim::cleanAlloc(unsigned int n) {
 	return decreaseAlloc(excessSpace);
 }
 
+/************************************
+ *  Simulation variable control
+ ************************************/
+
 void enbody::NbodySim::setDT(double dt) {
 	this->deltaT = dt;
 }
@@ -128,9 +128,19 @@ void enbody::NbodySim::setWorkingSector(vec2<int> sector) {
 	this->workingSector = sector;
 }
 
+void NbodySim::setWorkingSector(int x, int y) {
+	this->workingSector.x = x;
+	this->workingSector.y = y;
+}
+
 vec2<int> enbody::NbodySim::getWorkingSector() {
 	return this->workingSector;
 }
+
+
+/************************************
+ *  Particle generation
+ ************************************/
 
 void enbody::NbodySim::setNormalWeight(double w, double s) {
 	this->meanWeight = w;
@@ -158,6 +168,9 @@ double enbody::NbodySim::getNormalSizeSD() {
 	return this->sdSize;
 }
 
+/************************************
+ *  Particle control (add/remove)
+ ************************************/
 void enbody::NbodySim::addParticles(int nParticles) {
 
 	if (getFreeSpace() < nParticles)
@@ -184,11 +197,50 @@ void enbody::NbodySim::addParticle(Particle particle) {
 void enbody::NbodySim::deleteParticles(int index) {
 }
 
+/**********************************
+ * Simulation control
+ * ********************************/
+void NbodySim::startSimulation() {
+}
+
+void NbodySim::setRealtimeFraction(double x) {
+}
+
+void NbodySim::pauseSimulation() {
+}
+
+void NbodySim::resumeSimulation() {
+}
+
+void NbodySim::resumeSimulation(double x) {
+}
+
+/************************************
+ * Simulation Logic
+ ************************************/
+
 void enbody::NbodySim::step() {
 }
 
+/************************************
+ * Error control
+ ************************************/
 void NbodySim::_setError(Error err, std::string message, int line,
 		std::string file) {
+}
+
+Error enbody::NbodySim::getError() {
+}
+
+void NbodySim::resetError() {
+	myError = myError();
+	myError.error = noError;
+}
+bool enbody::NbodySim::hadError() {
+	return myError.error != noError;
+}
+
+void enbody::NbodySim::printError() {
 }
 
 } //Namespace
