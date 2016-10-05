@@ -7,6 +7,7 @@
 
 #include "NbodySim.h"
 #include <stdlib.h>;
+#include <random>
 namespace enbody {
 
 /************************************
@@ -176,8 +177,22 @@ void enbody::NbodySim::addParticles(int nParticles) {
 	if (getFreeSpace() < nParticles)
 		increaseAlloc(nParticles - getFreeSpace());
 
-	//Add particles
+//TODO: Give starting values for location
 
+	//Add particles
+	std::default_random_engine gen(time(0));
+	std::normal_distribution<double> normMass(getNormalWeight(), getNormalWeightSD());
+	std::normal_distribution<double> normSize(getNormalSize(), getNormalSizeSD());
+	std::uniform_real_distribution<double> uniLoc();
+
+
+	for (int i = 0, i < nParticles, i++) {
+		Particle par;
+		par[i].Mass = normMass(gen);
+		par[i].Size = normSize(gen);
+		par[i].Loc.x = uniLoc(gen);
+		par[i].Loc.y = uniLoc(gen);
+	}
 }
 
 void enbody::NbodySim::addParticles(vec2<double> min, vec2<double> max,
