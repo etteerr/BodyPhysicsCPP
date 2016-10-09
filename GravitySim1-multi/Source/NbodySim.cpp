@@ -177,7 +177,7 @@ void enbody::NbodySim::addParticles(int nParticles) {
 	if (getFreeSpace() < nParticles)
 		increaseAlloc(nParticles - getFreeSpace());
 
-//TODO: Give starting values for location
+//TODO: Check input norm distribution
 
 	//Add particles
 	std::default_random_engine gen(time(0));
@@ -186,12 +186,12 @@ void enbody::NbodySim::addParticles(int nParticles) {
 	std::uniform_real_distribution<double> uniLoc();
 
 
-	for (int i = 0, i < nParticles, i++) {
+	for (int i = 0; i < nParticles; i++) {
 		Particle par;
-		par[i].Mass = normMass(gen);
-		par[i].Size = normSize(gen);
-		par[i].Loc.x = uniLoc(gen);
-		par[i].Loc.y = uniLoc(gen);
+		par[i].mass = normMass(gen);
+		par[i].size = normSize(gen);
+		par[i].position.x = uniLoc(gen);
+		par[i].position.y = uniLoc(gen);
 	}
 }
 
