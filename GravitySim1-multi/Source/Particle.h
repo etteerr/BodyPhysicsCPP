@@ -20,7 +20,8 @@ namespace enbody {
 // This remains locked across function calls
 class Particle {
 public:
-	Particle(double nMass);
+	Particle(double nMass, vec2<double> pos, double _radius);
+	Particle(double nMass, double x, double y, double _radius);
 
 	//Getters and setters, each with their own mutex lock or a global one..
 	double getMass();
@@ -31,6 +32,7 @@ public:
 	vec2<double> getVelocity(); //Velocity is only set by this class (step)
 	vec2<double> getForce();
 	vec2<double> getSector();
+	double 		 getRadius();
 	/**
 	 * returns relative to origin (less accurate)
 	 */
@@ -43,9 +45,11 @@ public:
 	// calculates new velocity and steps position one velocity * dt
 	void step();
 
+
 private:
 	//Variable
 	double mass;
+	double radius;
 	vec2<double> position;
 	vec2<double> velocity;
 	vec2<double> force;
