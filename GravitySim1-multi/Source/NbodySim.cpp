@@ -10,6 +10,8 @@
 #include <random>
 namespace enbody {
 
+
+
 /************************************
  *  Constructor / Deconstructor
  ************************************/
@@ -28,7 +30,13 @@ enbody::NbodySim::~NbodySim() {
 	freeAllocatedMemory();
 }
 
-
+bool enbody::NbodySim::initRNG(double s){
+	gen = std::default_random_engine (s);
+	normMass = std::normal_distribution(getNormalWeight(), getNormalWeightSD());
+	normSize = std::normal_distribution(getNormalSize(), getNormalSizeSD());
+	uniLoc = std::uniform_int_distribution();
+	//TODO: return bool for error handling
+}
 
 /************************************
  *  Memory Control
@@ -180,18 +188,14 @@ void enbody::NbodySim::addParticles(int nParticles) {
 //TODO: Check input norm distribution
 
 	//Add particles
-	std::default_random_engine gen(time(0));
-	std::normal_distribution<double> normMass(getNormalWeight(), getNormalWeightSD());
-	std::normal_distribution<double> normSize(getNormalSize(), getNormalSizeSD());
-	std::uniform_real_distribution<double> uniLoc();
-
 
 	for (int i = 0; i < nParticles; i++) {
 		Particle par;
-		par[i].mass = normMass(gen);
-		par[i].size = normSize(gen);
-		par[i].position.x = uniLoc(gen);
-		par[i].position.y = uniLoc(gen);
+		par.mass = normMass(gen);
+		par.size = normSize(gen);
+		par.position.x = uniLoc(gen);
+		par.position.y = uniLoc(gen);
+		addParticle(par);
 	}
 }
 

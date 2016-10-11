@@ -48,6 +48,14 @@ public:
 	 */
 	~NbodySim();
 
+	/**
+	 * Initializes random number generator
+	 * creates normal distribution for mass and size
+	 * Creates uniform distribution for location
+	 */
+	bool initRNG(double s);
+
+
 //Error messaging
 	Error getError();
 	bool hadError();
@@ -219,6 +227,11 @@ private:
 	double sdWeight = 0;
 	double meanSize = 0;
 	double sdSize = 0;
+
+	std::default_random_engine gen;
+	std::normal_distribution<double> normMass;
+	std::normal_distribution<double> normSize;
+	std::uniform_real_distribution<double> uniLoc;
 
 //Step
 	/**
