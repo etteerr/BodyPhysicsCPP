@@ -30,7 +30,7 @@ class NbodySim {
 public:
 
 	// Simulation Parameters
-	static double deltaT = 0;
+	static double deltaT;
 
 	/**
 	 * Initializes the simulator with an initial space of 1024 particles
@@ -216,7 +216,7 @@ public:
 
 private:
 	//Particles (memory and current working stuff)
-	Particle* particleArrayPointer = nullptr_t;
+	Particle* particleArrayPointer;
 	unsigned int nParticles = 0;
 	unsigned int particleArraySize;
 	unsigned int freeSpacePointer = 0; //Points to the first free space in particleArray
@@ -241,9 +241,9 @@ private:
 	void step();
 
 	//Error handling
-	Error myError = noError;
-#define setError(E,M) _setError((Error)E,std::string(M), int(__LINE__), std::string(__FILE__))
-	void _setError(Error, std::string message, int line, std::string file);
+	Error myError;
+#define setError(E,M) _setError((errorType)E,std::string(M), int(__LINE__), std::string(__FILE__))
+	void _setError(errorType, std::string message, int line, std::string file);
 };
 
 }

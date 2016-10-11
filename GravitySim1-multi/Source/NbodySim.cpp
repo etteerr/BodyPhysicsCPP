@@ -7,8 +7,8 @@
 
 #include "NbodySim.h"
 #include <stdlib.h>;
-#include <random>
 namespace enbody {
+double NbodySim::deltaT = 0;
 
 
 
@@ -185,16 +185,11 @@ void enbody::NbodySim::addParticles(int nParticles) {
 	if (getFreeSpace() < nParticles)
 		increaseAlloc(nParticles - getFreeSpace());
 
-//TODO: Check input norm distribution
-
 	//Add particles
 
+
 	for (int i = 0; i < nParticles; i++) {
-		Particle par;
-		par.mass = normMass(gen);
-		par.size = normSize(gen);
-		par.position.x = uniLoc(gen);
-		par.position.y = uniLoc(gen);
+		Particle par(normMass(gen), uniLoc(gen), uniLoc(gen), normSize(gen));
 		addParticle(par);
 	}
 }
@@ -244,15 +239,18 @@ void enbody::NbodySim::step() {
 /************************************
  * Error control
  ************************************/
-void NbodySim::_setError(Error err, std::string message, int line,
+void NbodySim::_setError(errorType err, std::string message, int line,
 		std::string file) {
 }
 
 Error enbody::NbodySim::getError() {
+	return myError;
 }
 
 void NbodySim::resetError() {
-	myError = myError();
+	myError.errormsg = "";
+	myError.file = "";
+	myError.line = -1;
 	myError.error = noError;
 }
 bool enbody::NbodySim::hadError() {
