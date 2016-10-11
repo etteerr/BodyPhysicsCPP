@@ -15,9 +15,20 @@ std::mutex vwrite;
 std::mutex pwrite;
 std::mutex fwrite;
 
-Particle::Particle(double nMass){
+Particle::Particle(double nMass, vec2<double> pos, double _radius){
 	mass = nMass;
+	position = pos;
+	radius = _radius;
 }
+
+
+Particle::Particle(double nMass, double x, double y, double _radius) {
+	mass = nMass;
+	radius = _radius;
+	vec2d pos(x,y);
+	position = pos;
+}
+
 
 double Particle::getMass() {
 	return mass;
@@ -123,6 +134,10 @@ void Particle::addForce(double x, double y) {
 	fwrite.lock();
 	force += vec2<double>(x, y);
 	fwrite.unlock();
+}
+
+double Particle::getRadius() {
+	return radius;
 }
 
 void Particle::normalizePosition() {
