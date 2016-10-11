@@ -30,11 +30,12 @@ enbody::NbodySim::~NbodySim() {
 	freeAllocatedMemory();
 }
 
-bool enbody::NbodySim::initRNG(double s){
+void enbody::NbodySim::initRNG(double s){
 	gen = std::default_random_engine (s);
 	normMass = std::normal_distribution(getNormalWeight(), getNormalWeightSD());
 	normSize = std::normal_distribution(getNormalSize(), getNormalSizeSD());
 	uniLoc = std::uniform_int_distribution();
+	rngIntialized = true;
 	//TODO: return bool for error handling
 }
 
@@ -185,6 +186,10 @@ void enbody::NbodySim::addParticles(int nParticles) {
 	if (getFreeSpace() < nParticles)
 		increaseAlloc(nParticles - getFreeSpace());
 
+	if (!rngIntialized) {
+		setError(rngUninitialized, "RNG was not correctly initialized");
+		throw std::exception("RNG uninitialized");
+	}
 	//Add particles
 
 

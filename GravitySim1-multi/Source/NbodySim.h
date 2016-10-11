@@ -15,7 +15,7 @@ namespace enbody {
 
 //Define error types
 enum errorType {
-	noError, allocationError, deallocationError, mathError, memoryError
+	noError, allocationError, deallocationError, mathError, memoryError, rngUninitialized
 };
 
 //Define error struct
@@ -53,7 +53,7 @@ public:
 	 * creates normal distribution for mass and size
 	 * Creates uniform distribution for location
 	 */
-	bool initRNG(double s);
+	void initRNG(double s);
 
 
 //Error messaging
@@ -227,6 +227,7 @@ private:
 	double sdWeight = 0;
 	double meanSize = 0;
 	double sdSize = 0;
+	bool rngIntialized = false;
 
 	std::default_random_engine gen;
 	std::normal_distribution<double> normMass;
