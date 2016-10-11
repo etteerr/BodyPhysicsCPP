@@ -45,7 +45,7 @@ public:
 
 private:
 	//Variable
-	const double mass;
+	double mass;
 	vec2<double> position;
 	vec2<double> velocity;
 	vec2<double> force;

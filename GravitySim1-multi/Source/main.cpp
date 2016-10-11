@@ -1,6 +1,7 @@
 #include <GL/freeglut_std.h>
 #include <GL/gl.h>
 #include <string>
+#include <iostream>
 #include "NbodySim.h"
 
 //Simulator
@@ -81,6 +82,7 @@ void mouse(int button, int state, int x, int y) {
 }
 
 int main(int narg, char** args) {
+	using namespace std;
 	//init sim
 	//TODO: commandline init with variables
 	//	spread from origin (mean=0, alpha=?)

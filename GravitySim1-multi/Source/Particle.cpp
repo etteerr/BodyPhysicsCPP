@@ -15,11 +15,8 @@ std::mutex vwrite;
 std::mutex pwrite;
 std::mutex fwrite;
 
-Particle::Particle(double nMass) :
-		mass(nMass) {
-	pwrite = std::mutex();
-	fwrite = std::mutex();
-	vwrite = std::mutex();
+Particle::Particle(double nMass){
+	mass = nMass;
 }
 
 double Particle::getMass() {
@@ -27,7 +24,7 @@ double Particle::getMass() {
 }
 
 vec2<double> Particle::getPosition() {
-	double tmp;
+	vec2<double> tmp;
 	pwrite.lock(); //Lock to prevent writing
 	tmp = this->position;
 	pwrite.unlock();

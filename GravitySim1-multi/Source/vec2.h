@@ -20,54 +20,54 @@ public:
 		return *this;
 	}
 
-	vec2 operator+(vec2& v) {
+	vec2 operator+(const vec2& v) {
 		return vec2(x + v.x, y + v.y);
 	}
-	vec2 operator-(vec2& v) {
+	vec2 operator-(const vec2& v) {
 		return vec2(x - v.x, y - v.y);
 	}
 
-	vec2& operator+=(vec2& v) {
+	vec2& operator+=(const vec2& v) {
 		x += v.x;
 		y += v.y;
 		return *this;
 	}
-	vec2& operator-=(vec2& v) {
+	vec2& operator-=(const vec2& v) {
 		x -= v.x;
 		y -= v.y;
 		return *this;
 	}
 
-	vec2 operator+(double s) {
+	vec2 operator+(const double &s) {
 		return vec2(x + s, y + s);
 	}
-	vec2 operator-(double s) {
+	vec2 operator-(const double &s) {
 		return vec2(x - s, y - s);
 	}
-	vec2 operator*(double s) {
+	vec2 operator*(const double &s) {
 		return vec2(x * s, y * s);
 	}
-	vec2 operator/(double s) {
+	vec2 operator/(const double &s) {
 		return vec2(x / s, y / s);
 	}
 
 
-	vec2& operator+=(double s) {
+	vec2& operator+=(const double & s) {
 		x += s;
 		y += s;
 		return *this;
 	}
-	vec2& operator-=(double s) {
+	vec2& operator-=(const double & s) {
 		x -= s;
 		y -= s;
 		return *this;
 	}
-	vec2& operator*=(double s) {
+	vec2& operator*=(const double & s) {
 		x *= s;
 		y *= s;
 		return *this;
 	}
-	vec2& operator/=(double s) {
+	vec2& operator/=(const double & s) {
 		x /= s;
 		y /= s;
 		return *this;
@@ -78,7 +78,7 @@ public:
 		this->y = y;
 	}
 
-	void rotate(double deg) {
+	void rotate(const double & deg) {
 		double theta = deg / 180.0 * M_PI;
 		double c = cos(theta);
 		double s = sin(theta);
@@ -94,14 +94,14 @@ public:
 		return *this;
 	}
 
-	float dist(vec2 v) const {
+	float dist(const vec2& v) const {
 		vec2 d(v.x - x, v.y - y);
 		return d.length();
 	}
 	float length() const {
 		return std::sqrt(x * x + y * y);
 	}
-	void truncate(double length) {
+	void truncate(const double& length) {
 		double angle = atan2f(y, x);
 		x = length * cos(angle);
 		y = length * sin(angle);

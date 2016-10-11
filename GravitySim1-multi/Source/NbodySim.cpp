@@ -7,8 +7,8 @@
 
 #include "NbodySim.h"
 #include <stdlib.h>;
-#include <random>
 namespace enbody {
+double NbodySim::deltaT = 0;
 
 /************************************
  *  Constructor / Deconstructor
@@ -177,22 +177,8 @@ void enbody::NbodySim::addParticles(int nParticles) {
 	if (getFreeSpace() < nParticles)
 		increaseAlloc(nParticles - getFreeSpace());
 
-//TODO: Check input norm distribution
-
 	//Add particles
-	std::default_random_engine gen(time(0));
-	std::normal_distribution<double> normMass(getNormalWeight(), getNormalWeightSD());
-	std::normal_distribution<double> normSize(getNormalSize(), getNormalSizeSD());
-	std::uniform_real_distribution<double> uniLoc();
 
-
-	for (int i = 0; i < nParticles; i++) {
-		Particle par;
-		par[i].mass = normMass(gen);
-		par[i].size = normSize(gen);
-		par[i].position.x = uniLoc(gen);
-		par[i].position.y = uniLoc(gen);
-	}
 }
 
 void enbody::NbodySim::addParticles(vec2<double> min, vec2<double> max,
@@ -240,15 +226,18 @@ void enbody::NbodySim::step() {
 /************************************
  * Error control
  ************************************/
-void NbodySim::_setError(Error err, std::string message, int line,
+void NbodySim::_setError(errorType err, std::string message, int line,
 		std::string file) {
 }
 
 Error enbody::NbodySim::getError() {
+	return myError;
 }
 
 void NbodySim::resetError() {
-	myError = myError();
+	myError.errormsg = "";
+	myError.file = "";
+	myError.line = -1;
 	myError.error = noError;
 }
 bool enbody::NbodySim::hadError() {
