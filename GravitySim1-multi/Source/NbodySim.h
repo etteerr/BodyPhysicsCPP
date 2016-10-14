@@ -172,7 +172,7 @@ public:
 	 * deletes particle on index n
 	 * use memmove to shift array to left, keep freespace right
 	 */
-	void deleteParticles(int n);
+	void deleteParticle(int n);
 
 	/**
 	 * startSimulation

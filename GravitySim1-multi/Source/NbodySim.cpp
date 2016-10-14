@@ -220,7 +220,7 @@ void enbody::NbodySim::addParticle(Particle particle) {
 		setError(memoryError, "No free memory available");
 }
 
-void enbody::NbodySim::deleteParticles(int index) {
+void enbody::NbodySim::deleteParticle(int index) {
 }
 
 /**********************************
