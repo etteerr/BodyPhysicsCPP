@@ -101,11 +101,12 @@ int main(int narg, char** args) {
 			 << "[sdMass] = 5.0					Means see [meanMass]" << endl
 			 << "[nParticles] = 1024			Means amount of particles to generate" << endl;
 		//Init default
-		simulator = enbody::NbodySim(1024);
+		enbody::NbodySim simulator(512);
 		simulator.setDT(0.01);
 		simulator.setNormalSize(0.1, 0.05);
 		simulator.setNormalWeight(5.0, 1.0);
 		simulator.setWorkingSector(0,0);
+		simulator.initRNG(0);
 		simulator.addParticles(1024);
 
 

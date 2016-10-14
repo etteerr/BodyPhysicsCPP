@@ -59,8 +59,12 @@ bool enbody::NbodySim::initAlloc(unsigned int n) {
 }
 
 bool enbody::NbodySim::increaseAlloc(unsigned int n) {
+	if(particleArrayPointer <= 0)
+		return false;
+
 	Particle *newPointer = (Particle *) realloc(particleArrayPointer,
 			sizeof(Particle) * (particleArraySize + n));
+
 	if (newPointer != NULL) {
 		particleArraySize += n;
 		particleArrayPointer = newPointer;
@@ -74,6 +78,8 @@ bool enbody::NbodySim::increaseAlloc(unsigned int n) {
 }
 
 bool enbody::NbodySim::decreaseAlloc(unsigned int n) {
+	if(particleArrayPointer <= 0 || (particleArraySize - n) < 1)
+			return false;
 	if (freeSpacePointer >= (particleArraySize - n)) {
 		setError(deallocationError, "Memory to deallocate is in use.");
 		return false;
@@ -105,7 +111,7 @@ void NbodySim::freeAllocatedMemory() {
 
 
 unsigned int NbodySim::getFreeSpace() {
-	return (unsigned int) (particleArraySize - freeSpacePointer)-1;
+	return (unsigned int) (particleArraySize - freeSpacePointer);
 }
 
 /**
