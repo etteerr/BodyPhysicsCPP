@@ -289,7 +289,7 @@ bool enbody::NbodySim::hadError() {
 }
 
 void enbody::NbodySim::printError() {
-	std::printf("Error occurred: %s\nline: %i\nFile: %s\n", myError.errormsg, myError.line, myError.file);
+	std::printf("Error occurred: %s\nline: %i\nFile: %s\n", myError.errormsg.c_str(), myError.line, myError.file.c_str());
 }
 
 } //Namespace
