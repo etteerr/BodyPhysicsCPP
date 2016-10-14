@@ -81,53 +81,11 @@ void mouse(int button, int state, int x, int y) {
 		s = false;
 	}
 }
-void workfun(void *data, void * instuctions) {
-	int i = *(int*)data;
-	std::cout << "Worker works: " << i << std::endl;
-	delete (int*)data;
-}
 
-void workfun2(void *data, void * instuctions) {
-	int i = *(int*)data;
-	std::cout << "me works: " << i << std::endl;
-	delete (int*)data;
-}
 
-void testQueue() {
-	using namespace std;
-	Dwarves myDwarves;
 
-	for (int i = 0; i < 20000; i++)
-		myDwarves.emplaceWork((void*)new int(i),(void*)workfun, NULL);
-
-	Dwarves::Work w = myDwarves.getWork();
-	workfun2(w.data, w.instructions);
-
-	w = myDwarves.getWork();
-	workfun2(w.data, w.instructions);
-
-	myDwarves.recruit(1);
-	int i = 0;
-	while(myDwarves.hasWork()) {
-		cout << myDwarves.getAmountOfWorkLeft() << endl;
-		if (myDwarves.getAmountOfWorkLeft() < 200)
-			myDwarves.dismiss();
-		w = myDwarves.getWork();
-		if (!w.empty)
-			workfun2(w.data, w.instructions);
-		i++;
-	}
-	cout << "Work done: " << i << endl;;
-
-}
 
 int main(int narg, char** args) {
-	try {
-		testQueue();
-	}catch(std::exception *e) {
-		cout << e->what() << endl;
-	}
-	return 0;
 	using namespace std;
 	//init sim
 	//TODO: commandline init with variables

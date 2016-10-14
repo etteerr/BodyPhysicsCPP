@@ -87,5 +87,42 @@ private:
 	Work noWork;
 
 };
+/*
+void workfun(void *data, void * instuctions) {
+	int i = *(int*)data;
+	std::cout << "Worker works: " << i << std::endl;
+	delete (int*)data;
+}
 
+void workfun2(void *data, void * instuctions) {
+	int i = *(int*)data;
+	std::cout << "me works: " << i << std::endl;
+	delete (int*)data;
+}
+void testQueue() {
+	Dwarves myDwarves;
+	myDwarves.recruit(1);
+	for (int i = 0; i < 200000; i++)
+		myDwarves.emplaceWork((void*)new int(i),(void*)workfun, NULL);
+
+	Dwarves::Work w = myDwarves.getWork();
+	workfun2(w.data, w.instructions);
+
+	w = myDwarves.getWork();
+	workfun2(w.data, w.instructions);
+
+
+	int i = 0;
+	while(myDwarves.hasWork()) {
+		std::cout << myDwarves.getAmountOfWorkLeft() << std::endl;
+		w = myDwarves.getWork();
+		if (!w.empty)
+			workfun2(w.data, w.instructions);
+		i++;
+	}
+	std::cout << "Work done: " << i << std::endl;
+
+	myDwarves.dismiss();
+
+}*/
 #endif /* DWARVES_H_ */

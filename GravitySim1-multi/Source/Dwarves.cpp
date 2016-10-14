@@ -13,6 +13,7 @@ Dwarves::Dwarves() {
 	noWork.work = std::nullptr_t();
 	noWork.instructions = std::nullptr_t();
 	noWork.empty = true;
+	dismissal = false;
 }
 
 Dwarves::~Dwarves() {
