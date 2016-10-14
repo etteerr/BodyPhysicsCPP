@@ -2,6 +2,7 @@
 #include <GL/gl.h>
 #include <string>
 #include <iostream>
+#define nbodyerrorverbose 1
 #include "NbodySim.h"
 #include "Dwarves.h"
 
