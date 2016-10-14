@@ -248,6 +248,19 @@ void NbodySim::resumeSimulation(double x) {
 void enbody::NbodySim::step() {
 }
 
+vec2<double> NbodySim::calcForce(Particle& p1, Particle& p2) {
+	return vec2d(0,0);
+}
+
+void NbodySim::queueForce() {
+}
+
+void NbodySim::queueStep() {
+}
+
+void NbodySim::simloop() {
+}
+
 /************************************
  * Error control
  ************************************/
