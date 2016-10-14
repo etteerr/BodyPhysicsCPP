@@ -152,7 +152,7 @@ public:
 	 * Particles are generated with random weights based on the global mean weight +- sd
 	 * Idem for size
 	 */
-	void addParticles(int);
+	void addParticles(unsigned int);
 	/**
 	 * Adds particles in a bound region between min and max where
 	 * 	0 < min < max && min < max < 1

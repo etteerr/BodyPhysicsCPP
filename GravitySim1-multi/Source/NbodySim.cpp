@@ -188,7 +188,7 @@ double enbody::NbodySim::getNormalSizeSD() {
 /************************************
  *  Particle control (add/remove)
  ************************************/
-void enbody::NbodySim::addParticles(int nParticles) {
+void enbody::NbodySim::addParticles(unsigned int nParticles) {
 
 	if (getFreeSpace() < nParticles)
 		increaseAlloc(nParticles - getFreeSpace());
