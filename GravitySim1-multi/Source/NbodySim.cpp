@@ -8,11 +8,14 @@
 #include "NbodySim.h"
 #include <stdlib.h>
 #include <stdexcept>
+#include <vector>
+#include <math.h>
+#include <queue>
 namespace enbody {
 double NbodySim::deltaT = 0;
 
 
-
+#define G 0.0000000000667
 /************************************
  *  Constructor / Deconstructor
  ************************************/
@@ -200,7 +203,7 @@ void enbody::NbodySim::addParticles(unsigned int nParticles) {
 	//Add particles
 
 
-	for (int i = 0; i < nParticles; i++) {
+	for (unsigned int i = 0; i < nParticles; i++) {
 		Particle par(normMass(gen), uniLoc(gen), uniLoc(gen), normSize(gen));
 		addParticle(par);
 	}
@@ -246,16 +249,64 @@ void NbodySim::resumeSimulation(double x) {
  ************************************/
 
 void enbody::NbodySim::step() {
+	//Fill queue
+	queueForce();
+	queueStep();
+
+	//Work on queue as well (dont let the dwarves to all the work!!)
+	Dwarves::Work work;
+	while(!(work = myDwarves.getWork()).empty) {
+		void (*fun)(void*,void*) = (void (*) (void*,void*))work.work;
+		fun(work.data, work.instructions);
+	}
+
+	//We have done all the work
 }
 
-vec2<double> NbodySim::calcForce(Particle& p1, Particle& p2) {
-	return vec2d(0,0);
+
+void forceDwarf(void * particles, void * instr) {
+	unsigned int myParticle = ((instructions*) instr)->from;
+	unsigned int nParticles = ((instructions*) instr)->nPart;
+	for(unsigned int i = myParticle+1; i < nParticles; i++)
+		((Particle*)particles)[myParticle].addForce(((Particle*)particles)[i]);
+	delete ((instructions*) instr);
 }
+
+void stepDwarf(void * particles, void * instr) {
+	((Particle*)particles)[((instructions*) instr)->from].step();
+	delete ((instructions*) instr);
+}
+
 
 void NbodySim::queueForce() {
+
+	instructions* a;
+	Dwarves::Work w;
+
+	for(unsigned int i = 0; i < nParticles; i++) {
+		a = new instructions;
+		a->nPart = nParticles;
+		a->from = i;
+		w.data = particleArrayPointer;
+		w.work = (void*)forceDwarf;
+		w.instructions = a;
+		myDwarves.emplaceWork(w);
+	}
+
 }
 
 void NbodySim::queueStep() {
+	instructions* a;
+	Dwarves::Work w;
+
+	for(unsigned int i = 0; i < nParticles; i++) {
+		a = new instructions;
+		a->from = i;
+		w.data = particleArrayPointer;
+		w.work = (void*)stepDwarf;
+		w.instructions = a;
+		myDwarves.emplaceWork(w);
+	}
 }
 
 void NbodySim::simloop() {

@@ -118,6 +118,14 @@ public:
 		return (v1.x * v2.y) - (v1.y * v2.x);
 	}
 
+	vec2& direction(vec2& that) {
+		vec2<double> direction;
+		double r = dist(that);
+		direction.x = (that.x - x)/r;
+		direction.y = (that.y - y)/r;
+		return direction;
+	}
+
 };
 
 typedef vec2<float> vec2f;

@@ -58,7 +58,7 @@ void Dwarves::emplaceWork(void* data, void* work, void *instructions) {
 	emplaceWork(w);
 }
 
-Dwarves::Work Dwarves::getWork() {
+Dwarves::Work Dwarves::getWorkBlocking() {
 	std::unique_lock<std::mutex> lock(m);
 	while(workQueue.empty()) {
 		c.wait(lock);
@@ -80,10 +80,21 @@ int Dwarves::getAmountOfWorkLeft() {
 	return workQueue.size();
 }
 
+Dwarves::Work Dwarves::getWork() {
+	std::unique_lock<std::mutex> lock(m);
+	if (workQueue.empty())
+		return noWork; //return Work::empty == true
+
+	Work w = workQueue.front();
+	workQueue.pop();
+
+	return w;
+}
+
 void Dwarves::dwarf() {
 	Work work;
 	while(1){
-		work = this->getWork();
+		work = this->getWorkBlocking();
 		if (work.empty || this->dismissal)
 			return;
 		void (*fun)(void*,void*) = (void (*) (void*,void*))work.work;

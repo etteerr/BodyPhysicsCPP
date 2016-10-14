@@ -136,6 +136,7 @@ void Particle::addForce(double x, double y) {
 	fwrite.unlock();
 }
 
+
 double Particle::getRadius() {
 	return radius;
 }
@@ -157,4 +158,20 @@ void Particle::normalizePosition() {
 	}
 }
 
+double Particle::getDistance(Particle& p) {
+	return sqrt(pow(p.position.x - position.x,2)+pow(p.position.y - position.y,2));
+}
+
+vec2<double> Particle::calcForce(Particle& p) {
+	double f = (G * mass * p.mass)/pow(getDistance(p) ,2);
+	vec2d v = position.direction(p.position);
+	return v*f;
+}
+
+void Particle::addForce(Particle& p) {
+	vec2d v = calcForce(p);
+	this->addForce(v);
+}
+
 } /* namespace enbody */
+

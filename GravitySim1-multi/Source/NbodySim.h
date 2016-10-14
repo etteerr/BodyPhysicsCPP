@@ -14,6 +14,7 @@
 
 #include "vec2.h"
 #include "Particle.h"
+#include "Dwarves.h"
 #include <string.h>
 #include <random>
 namespace enbody {
@@ -29,6 +30,12 @@ struct Error {
 	std::string errormsg;
 	int line;
 	std::string file;
+};
+
+//Instruction struct
+struct instructions {
+		unsigned int from;
+		unsigned int nPart;
 };
 
 class NbodySim {
@@ -219,6 +226,12 @@ public:
 	void resumeSimulation();
 	void resumeSimulation(double x);
 
+	/**
+	 * getDistance
+	 * 	calculates distance between two particles
+	 */
+	double getDistance(Particle&, Particle&);
+
 private:
 	//Particles (memory and current working stuff)
 	Particle* particleArrayPointer;
@@ -245,13 +258,14 @@ private:
 	 * with stepsize dt
 	 */
 	void step();
-	vec2<double> calcForce(Particle&, Particle&);
 	void queueForce();
 	void queueStep();
 	void simloop();
 
 	//Sim vars
 	double realtimeFraction; // denotes simulation speed relation to realtime (eg: 1 = 1:1),0=pause, negative = afap
+	Dwarves myDwarves;
+	unsigned int lastn; // for queueForce and step?
 
 	//Error handling
 	Error myError;

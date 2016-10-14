@@ -33,6 +33,8 @@ public:
 	vec2<double> getForce();
 	vec2<double> getSector();
 	double 		 getRadius();
+	double		 getDistance(Particle& p);
+	vec2<double> calcForce(Particle& p);
 	/**
 	 * returns relative to origin (less accurate)
 	 */
@@ -41,6 +43,7 @@ public:
 	void setForce(double x, double y);
 	void addForce(vec2<double>&);
 	void addForce(double x, double y);
+	void addForce(Particle&);
 
 	// calculates new velocity and steps position one velocity * dt
 	void step();

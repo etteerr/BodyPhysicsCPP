@@ -49,6 +49,7 @@ public:
 	/**
 	 * retrieves the next to do thing
 	 */
+	Work getWorkBlocking();
 	Work getWork();
 
 	/**
