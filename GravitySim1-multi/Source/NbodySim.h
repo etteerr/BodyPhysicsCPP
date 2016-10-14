@@ -11,6 +11,7 @@
 #include "vec2.h"
 #include "Particle.h"
 #include <string.h>
+#include <random>
 namespace enbody {
 
 //Define error types

@@ -25,6 +25,8 @@
 								<option id="gnu.cpp.compiler.exe.debug.option.debugging.level.169406421" name="Debug Level" superClass="gnu.cpp.compiler.exe.debug.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.dialect.std.1766241401" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.dialect.flags.71740778" name="Other dialect flags" superClass="gnu.cpp.compiler.option.dialect.flags" useByScannerDiscovery="true" value="-std=c++14" valueType="string"/>
+								<option id="gnu.cpp.compiler.option.other.other.1854674194" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0" valueType="string"/>
+								<option id="gnu.cpp.compiler.option.debugging.other.1937656457" name="Other debugging flags" superClass="gnu.cpp.compiler.option.debugging.other" useByScannerDiscovery="false" value="" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.670893009" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.890431083" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug">
@@ -37,6 +39,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.1810310120" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
 								<option id="gnu.cpp.link.option.libs.444165527" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" useByScannerDiscovery="false" valueType="libs">
 									<listOptionValue builtIn="false" value="glut"/>
+									<listOptionValue builtIn="false" value="pthread"/>
 									<listOptionValue builtIn="false" value="GL"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.214605889" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
@@ -49,6 +52,7 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.1371898753.1937373789" name="Dwarves.h" rcbsApplicability="disable" resourcePath="Source/Dwarves.h" toolsToInvoke=""/>
 					<sourceEntries>
 						<entry excluding="Source" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Source"/>
@@ -81,6 +85,7 @@
 								<option id="gnu.cpp.compiler.exe.release.option.debugging.level.1011196608" name="Debug Level" superClass="gnu.cpp.compiler.exe.release.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.dialect.std.51943623" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.dialect.flags.334357096" name="Other dialect flags" superClass="gnu.cpp.compiler.option.dialect.flags" useByScannerDiscovery="true" value="-std=c++14" valueType="string"/>
+								<option id="gnu.cpp.compiler.option.other.other.841181556" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1321935043" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.release.1531663327" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.release">
@@ -93,6 +98,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.release.1568440743" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.release">
 								<option id="gnu.cpp.link.option.libs.12937441" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="glut"/>
+									<listOptionValue builtIn="false" value="pthread"/>
 									<listOptionValue builtIn="false" value="GL"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.636861459" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
