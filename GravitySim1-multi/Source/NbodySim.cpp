@@ -252,7 +252,13 @@ void enbody::NbodySim::step() {
  * Error control
  ************************************/
 void NbodySim::_setError(errorType err, std::string message, int line,
-		std::string file) {
+		std::string file, bool print) {
+	myError.error = err;
+	myError.errormsg = message;
+	myError.line = line;
+	myError.file = file;
+	if (print)
+		printError();
 }
 
 Error enbody::NbodySim::getError() {
@@ -270,6 +276,7 @@ bool enbody::NbodySim::hadError() {
 }
 
 void enbody::NbodySim::printError() {
+	std::printf("Error occurred: %s\nline: %i\nFile: %s\n", myError.errormsg, myError.line, myError.file);
 }
 
 } //Namespace

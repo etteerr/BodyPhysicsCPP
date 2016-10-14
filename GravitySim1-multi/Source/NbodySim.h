@@ -8,6 +8,10 @@
 #ifndef NBODYSIM_H_
 #define NBODYSIM_H_
 
+#ifndef nbodyerrorverbose
+#define nbodyerrorverbose 0
+#endif
+
 #include "vec2.h"
 #include "Particle.h"
 #include <string.h>
@@ -241,11 +245,18 @@ private:
 	 * with stepsize dt
 	 */
 	void step();
+	vec2<double> calcForce(Particle&, Particle&);
+	void queueForce();
+	void queueStep();
+	void simloop();
+
+	//Sim vars
+	double realtimeFraction; // denotes simulation speed relation to realtime (eg: 1 = 1:1),0=pause, negative = afap
 
 	//Error handling
 	Error myError;
-#define setError(E,M) _setError((errorType)E,std::string(M), int(__LINE__), std::string(__FILE__))
-	void _setError(errorType, std::string message, int line, std::string file);
+#define setError(E,M) _setError((errorType)E,std::string(M), int(__LINE__), std::string(__FILE__), nbodyerrorverbose)
+	void _setError(errorType, std::string message, int line, std::string file, bool print);
 };
 
 }
