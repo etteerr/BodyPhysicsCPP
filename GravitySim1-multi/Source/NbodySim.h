@@ -215,6 +215,7 @@ public:
 	 *
 	 */
 	void setRealtimeFraction(double x);
+	double getRealtimeFraction() { return realtimeFraction };
 
 	/**
 	 * pauseSimulation()

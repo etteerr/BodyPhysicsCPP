@@ -66,6 +66,31 @@ void keyboard(int key, int mouse_x, int mouse_y) {
 		zoom += zoomstep * zoom;
 	}
 
+	if (key == GLUT_KEY_HOME) {
+		simulator.pauseSimulation();
+	}
+
+	if (key == GLUT_KEY_END) {
+		simulator.resumeSimulation();
+	}
+
+	if (key == GLUT_KEY_PAGE_UP) {
+		simulator.setRealtimeFraction(simulator.getRealtimeFraction() + 0.01);
+	}
+	if (key == GLUT_KEY_PAGE_DOWN) {
+		simulator.setRealtimeFraction(simulator.getRealtimeFraction() - 0.01);
+	}
+
+	if (key == GLUT_KEY_F5) {
+		simulator.setRealtimeFraction(-1);
+	}
+	if (key == GLUT_KEY_F6) {
+		simulator.setRealtimeFraction(1);
+	}
+
+
+
+
 }
 
 void mouse(int button, int state, int x, int y) {
