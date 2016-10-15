@@ -16,6 +16,7 @@
 #include "Particle.h"
 #include "Dwarves.h"
 #include <string.h>
+#include <condition_variable>
 #include <random>
 namespace enbody {
 
@@ -182,6 +183,13 @@ public:
 	void deleteParticle(int n);
 
 	/**
+	 *
+	 */
+	unsigned int getNParticles() {
+		return nParticles;
+	}
+
+	/**
 	 * startSimulation
 	 * 	start a threaded simulation using as many threads as cores
 	 * 	initIterator creates a copy
@@ -227,6 +235,24 @@ public:
 	void resumeSimulation(double x);
 
 	/**
+	 *
+	 */
+	void stopSimulation();
+
+	/**
+	 *
+	 */
+	Particle* enableReadBuffer();
+	/**
+	 *
+	 */
+	void disableReadBuffer();
+	/**
+	 *
+	 */
+	bool updateBuffer(); //updates buffer and blocks until updated. if no update is available, buffer stays the same
+
+	/**
 	 * getDistance
 	 * 	calculates distance between two particles
 	 */
@@ -261,11 +287,22 @@ private:
 	void queueForce();
 	void queueStep();
 	void simloop();
+	void helpUpdate();
 
 	//Sim vars
 	double realtimeFraction; // denotes simulation speed relation to realtime (eg: 1 = 1:1),0=pause, negative = afap
+	double pauseRealtimeFraction;
 	Dwarves myDwarves;
 	unsigned int lastn; // for queueForce and step?
+	double simsteptime = 0; // time used per step for calculations
+	std::mutex stimstepmutex;
+	unsigned long int buffCstep;
+	unsigned long int cstep = 0;
+	std::mutex bufferMutex;
+	Particle * buffer;
+	unsigned int buffersize;
+	bool simrunning = false;
+	std::thread simthread;
 
 	//Error handling
 	Error myError;

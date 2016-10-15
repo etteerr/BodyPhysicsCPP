@@ -11,9 +11,10 @@
 #include <vector>
 #include <math.h>
 #include <queue>
+#include <time.h>
+
 namespace enbody {
 double NbodySim::deltaT = 0;
-
 
 #define G 0.0000000000667
 /************************************
@@ -21,11 +22,13 @@ double NbodySim::deltaT = 0;
  ************************************/
 
 enbody::NbodySim::NbodySim(unsigned int nParticles) {
+	cstep = 0;
 	initAlloc(nParticles);
 	resetError();
 }
 
 NbodySim::NbodySim() {
+	cstep = 0;
 	initAlloc(1024);
 	resetError();
 }
@@ -34,10 +37,12 @@ enbody::NbodySim::~NbodySim() {
 	freeAllocatedMemory();
 }
 
-void enbody::NbodySim::initRNG(double s){
-	gen = std::default_random_engine (s);
-	normMass = std::normal_distribution<double>(getNormalWeight(), getNormalWeightSD());
-	normSize = std::normal_distribution<double>(getNormalSize(), getNormalSizeSD());
+void enbody::NbodySim::initRNG(double s) {
+	gen = std::default_random_engine(s);
+	normMass = std::normal_distribution<double>(getNormalWeight(),
+			getNormalWeightSD());
+	normSize = std::normal_distribution<double>(getNormalSize(),
+			getNormalSizeSD());
 	uniLoc = std::uniform_real_distribution<double>();
 	rngIntialized = true;
 	//TODO: return bool for error handling
@@ -47,6 +52,7 @@ void enbody::NbodySim::initRNG(double s){
  *  Memory Control
  ************************************/
 bool enbody::NbodySim::initAlloc(unsigned int n) {
+	buffer = NULL;
 	//Alloc space and set (rel)pointer to 0
 	try {
 		particleArrayPointer = (Particle *) malloc(sizeof(Particle) * n);
@@ -62,7 +68,7 @@ bool enbody::NbodySim::initAlloc(unsigned int n) {
 }
 
 bool enbody::NbodySim::increaseAlloc(unsigned int n) {
-	if(particleArrayPointer <= 0)
+	if (particleArrayPointer <= 0)
 		return false;
 
 	Particle *newPointer = (Particle *) realloc(particleArrayPointer,
@@ -81,8 +87,8 @@ bool enbody::NbodySim::increaseAlloc(unsigned int n) {
 }
 
 bool enbody::NbodySim::decreaseAlloc(unsigned int n) {
-	if(particleArrayPointer <= 0 || (particleArraySize - n) < 1)
-			return false;
+	if (particleArrayPointer <= 0 || (particleArraySize - n) < 1)
+		return false;
 	if (freeSpacePointer >= (particleArraySize - n)) {
 		setError(deallocationError, "Memory to deallocate is in use.");
 		return false;
@@ -111,7 +117,6 @@ void NbodySim::freeAllocatedMemory() {
 	particleArraySize = 0;
 	nParticles = 0;
 }
-
 
 unsigned int NbodySim::getFreeSpace() {
 	return (unsigned int) (particleArraySize - freeSpacePointer);
@@ -157,7 +162,6 @@ vec2<int> enbody::NbodySim::getWorkingSector() {
 	return this->workingSector;
 }
 
-
 /************************************
  *  Particle generation
  ************************************/
@@ -202,7 +206,6 @@ void enbody::NbodySim::addParticles(unsigned int nParticles) {
 	}
 	//Add particles
 
-
 	for (unsigned int i = 0; i < nParticles; i++) {
 		Particle par(normMass(gen), uniLoc(gen), uniLoc(gen), normSize(gen));
 		addParticle(par);
@@ -229,19 +232,44 @@ void enbody::NbodySim::deleteParticle(int index) {
 /**********************************
  * Simulation control
  * ********************************/
+
 void NbodySim::startSimulation() {
+	if (simrunning)
+		return;
+
+	simrunning = true;
+
+	//start simloop thread
+	simthread = std::thread(simloop, this);
+	simthread.detach();
+
 }
 
 void NbodySim::setRealtimeFraction(double x) {
+	realtimeFraction = x;
 }
 
 void NbodySim::pauseSimulation() {
+	if(realtimeFraction == 0)
+		return;
+	pauseRealtimeFraction = realtimeFraction;
 }
 
 void NbodySim::resumeSimulation() {
+	if (realtimeFraction != 0 || pauseRealtimeFraction == 0)
+		return;
+	realtimeFraction = pauseRealtimeFraction;
 }
 
 void NbodySim::resumeSimulation(double x) {
+	realtimeFraction = x;
+}
+
+void NbodySim::stopSimulation() {
+	if (!simrunning)
+		return;
+	simrunning = false;
+	simthread.join();
 }
 
 /************************************
@@ -255,40 +283,40 @@ void enbody::NbodySim::step() {
 
 	//Work on queue as well (dont let the dwarves to all the work!!)
 	Dwarves::Work work;
-	while(!(work = myDwarves.getWork()).empty) {
-		void (*fun)(void*,void*) = (void (*) (void*,void*))work.work;
+	while (!(work = myDwarves.getWork()).empty) {
+		void (*fun)(void*, void*) = (void (*) (void*,void*))work.work;
 		fun(work.data, work.instructions);
 	}
 
 	//We have done all the work
+	cstep++;
 }
-
 
 void forceDwarf(void * particles, void * instr) {
 	unsigned int myParticle = ((instructions*) instr)->from;
 	unsigned int nParticles = ((instructions*) instr)->nPart;
-	for(unsigned int i = myParticle+1; i < nParticles; i++)
-		((Particle*)particles)[myParticle].addForce(((Particle*)particles)[i]);
+	for (unsigned int i = myParticle + 1; i < nParticles; i++)
+		((Particle*) particles)[myParticle].addForce(
+				((Particle*) particles)[i]);
 	delete ((instructions*) instr);
 }
 
 void stepDwarf(void * particles, void * instr) {
-	((Particle*)particles)[((instructions*) instr)->from].step();
+	((Particle*) particles)[((instructions*) instr)->from].step();
 	delete ((instructions*) instr);
 }
-
 
 void NbodySim::queueForce() {
 
 	instructions* a;
 	Dwarves::Work w;
 
-	for(unsigned int i = 0; i < nParticles; i++) {
+	for (unsigned int i = 0; i < nParticles; i++) {
 		a = new instructions;
 		a->nPart = nParticles;
 		a->from = i;
 		w.data = particleArrayPointer;
-		w.work = (void*)forceDwarf;
+		w.work = (void*) forceDwarf;
 		w.instructions = a;
 		myDwarves.emplaceWork(w);
 	}
@@ -299,17 +327,102 @@ void NbodySim::queueStep() {
 	instructions* a;
 	Dwarves::Work w;
 
-	for(unsigned int i = 0; i < nParticles; i++) {
+	for (unsigned int i = 0; i < nParticles; i++) {
 		a = new instructions;
 		a->from = i;
 		w.data = particleArrayPointer;
-		w.work = (void*)stepDwarf;
+		w.work = (void*) stepDwarf;
 		w.instructions = a;
 		myDwarves.emplaceWork(w);
 	}
 }
 
+void NbodySim::helpUpdate() {
+	Dwarves::Work work;
+	while (myDwarves.hasWork()) {
+		work = myDwarves.getWork();
+		if (work.empty)
+			return;
+		void (*fun)(void*, void*) = (void (*) (void*,void*))work.work;
+		fun(work.data, work.instructions);
+	}
+}
+
 void NbodySim::simloop() {
+	using namespace std::chrono_literals;
+
+	while (simrunning) {
+		//Lock buffer updates
+		bufferMutex.lock();
+
+		//start timer
+		auto start = std::chrono::high_resolution_clock::now();
+
+		//queue operations
+		queueForce();
+		queueStep();
+
+		//Help work
+		helpUpdate();
+
+		//done with step
+		bufferMutex.unlock();
+
+		//step time & wait
+		auto dt = std::chrono::high_resolution_clock::now();
+		dt = dt - start;
+		//wait
+		if (this->realtimeFraction >= 0) {
+			while (realtimeFraction == 0) {
+				std::this_thread::yield();
+			}
+			std::chrono::duration<int, std::nano> sleeptime = (deltaT
+					- (dt * realtimeFraction)) * 1000000;
+			if (sleeptime > 0)
+				std::this_thread::__sleep_for(std::chrono::duration<int>(0),
+						sleeptime);
+			stimstepmutex.lock();
+			simsteptime = (double) dt;
+			stimstepmutex.unlock();
+		}
+	}
+
+}
+
+Particle* NbodySim::enableReadBuffer() {
+	if (buffer != NULL)
+		return buffer;
+
+	buffer = alloca(nParticles * sizeof(Particle));
+	memcpy(buffer, particleArrayPointer, nParticles * sizeof(Particle));
+	buffCstep = cstep;
+	buffersize = nParticles;
+	return buffer;
+}
+
+bool NbodySim::updateBuffer() {
+	if (buffer == NULL)
+		return false;
+
+	if (buffCstep == cstep)
+		return true;
+
+	std::lock_guard<std::mutex> lock(bufferMutex);
+	//adjust size
+	if (!nParticles == buffersize) {
+		Particle* newb = realloc(buffer, nParticles * sizeof(Particle));
+		if (newb == NULL)
+			return false;
+		buffersize = nParticles;
+		buffer = newb;
+	}
+	//update buffer
+	memcpy(buffer, particleArrayPointer, nParticles * sizeof(Particle));
+}
+
+void NbodySim::disableReadBuffer() {
+	free(buffer);
+	buffer = NULL;
 }
 
 /************************************
@@ -340,7 +453,8 @@ bool enbody::NbodySim::hadError() {
 }
 
 void enbody::NbodySim::printError() {
-	std::printf("Error occurred: %s\nline: %i\nFile: %s\n", myError.errormsg.c_str(), myError.line, myError.file.c_str());
+	std::printf("Error occurred: %s\nline: %i\nFile: %s\n",
+			myError.errormsg.c_str(), myError.line, myError.file.c_str());
 }
 
 } //Namespace
