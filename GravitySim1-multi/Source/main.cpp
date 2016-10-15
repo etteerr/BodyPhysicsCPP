@@ -5,9 +5,12 @@
 #define nbodyerrorverbose 1
 #include "NbodySim.h"
 #include "Dwarves.h"
+#include "Particle.h"
 
 //Simulator
 enbody::NbodySim simulator;
+enbody::Particle * particles;
+unsigned int nParticles;
 
 //mouse move variables and setting
 static int sx;
@@ -109,6 +112,12 @@ int main(int narg, char** args) {
 		simulator.setWorkingSector(0,0);
 		simulator.initRNG(0);
 		simulator.addParticles(1024);
+
+		particles = simulator.enableReadBuffer();
+
+		simulator.setRealtimeFraction(-1);
+		simulator.pauseSimulation();
+		simulator.startSimulation();
 
 
 	}else

@@ -239,6 +239,12 @@ void NbodySim::startSimulation() {
 
 	simrunning = true;
 
+	//Recruit dwarves
+	unsigned int nDwarves = std::thread::hardware_concurrency();
+	if (nDwarves==0)
+		nDwarves = 3;
+	myDwarves.recruit(nDwarves); //Might return 0!
+
 	//start simloop thread
 	simthread = std::thread(&NbodySim::simloop, this);
 	simthread.detach();
