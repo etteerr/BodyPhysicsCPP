@@ -258,11 +258,6 @@ public:
 	 */
 	double getDistance(Particle&, Particle&);
 
-	/**
-	 * void simloop()
-	 */
-	void simloop();
-
 private:
 	//Particles (memory and current working stuff)
 	Particle* particleArrayPointer;
@@ -292,6 +287,7 @@ private:
 	void queueForce();
 	void queueStep();
 	void helpUpdate();
+	void simloop();
 
 	//Sim vars
 	double realtimeFraction; // denotes simulation speed relation to realtime (eg: 1 = 1:1),0=pause, negative = afap
