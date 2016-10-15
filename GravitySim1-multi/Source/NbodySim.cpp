@@ -240,7 +240,7 @@ void NbodySim::startSimulation() {
 	simrunning = true;
 
 	//start simloop thread
-	simthread = std::thread(simloop, this);
+	simthread = std::thread(&NbodySim::simloop, this);
 	simthread.detach();
 
 }
@@ -250,7 +250,7 @@ void NbodySim::setRealtimeFraction(double x) {
 }
 
 void NbodySim::pauseSimulation() {
-	if(realtimeFraction == 0)
+	if (realtimeFraction == 0)
 		return;
 	pauseRealtimeFraction = realtimeFraction;
 }
@@ -369,20 +369,22 @@ void NbodySim::simloop() {
 		bufferMutex.unlock();
 
 		//step time & wait
-		auto dt = std::chrono::high_resolution_clock::now();
-		dt = dt - start;
+		auto end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> dt = end - start;
 		//wait
 		if (this->realtimeFraction >= 0) {
 			while (realtimeFraction == 0) {
 				std::this_thread::yield();
 			}
-			std::chrono::duration<int, std::nano> sleeptime = (deltaT
-					- (dt * realtimeFraction)) * 1000000;
-			if (sleeptime > 0)
+			std::chrono::duration<int, std::nano> sleeptime =
+					std::chrono::duration<int, std::nano>((int)
+							(deltaT - (dt.count() * realtimeFraction))
+									* 1000000);
+			if (sleeptime.count() > 0)
 				std::this_thread::__sleep_for(std::chrono::duration<int>(0),
 						sleeptime);
 			stimstepmutex.lock();
-			simsteptime = (double) dt;
+			simsteptime = dt.count();
 			stimstepmutex.unlock();
 		}
 	}
@@ -393,7 +395,7 @@ Particle* NbodySim::enableReadBuffer() {
 	if (buffer != NULL)
 		return buffer;
 
-	buffer = alloca(nParticles * sizeof(Particle));
+	buffer = (Particle*) alloca(nParticles * sizeof(Particle));
 	memcpy(buffer, particleArrayPointer, nParticles * sizeof(Particle));
 	buffCstep = cstep;
 	buffersize = nParticles;
@@ -409,8 +411,8 @@ bool NbodySim::updateBuffer() {
 
 	std::lock_guard<std::mutex> lock(bufferMutex);
 	//adjust size
-	if (!nParticles == buffersize) {
-		Particle* newb = realloc(buffer, nParticles * sizeof(Particle));
+	if (!(nParticles == buffersize)) {
+		Particle* newb = (Particle*) realloc(buffer, nParticles * sizeof(Particle));
 		if (newb == NULL)
 			return false;
 		buffersize = nParticles;
@@ -418,6 +420,7 @@ bool NbodySim::updateBuffer() {
 	}
 	//update buffer
 	memcpy(buffer, particleArrayPointer, nParticles * sizeof(Particle));
+	return true;
 }
 
 void NbodySim::disableReadBuffer() {

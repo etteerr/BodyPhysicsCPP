@@ -258,6 +258,11 @@ public:
 	 */
 	double getDistance(Particle&, Particle&);
 
+	/**
+	 * void simloop()
+	 */
+	void simloop();
+
 private:
 	//Particles (memory and current working stuff)
 	Particle* particleArrayPointer;
@@ -286,7 +291,6 @@ private:
 	void step();
 	void queueForce();
 	void queueStep();
-	void simloop();
 	void helpUpdate();
 
 	//Sim vars
