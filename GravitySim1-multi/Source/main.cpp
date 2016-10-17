@@ -24,7 +24,7 @@ static bool s;
 static double modifier = 2.5; //setting
 
 //zoom variables / settings
-static double zoom = 1; // zoom + inital value
+static double zoom = 0.008; // zoom + inital value
 static double zoomstep = 0.03; //zoom speed
 
 //Program state
@@ -65,8 +65,8 @@ void drawCircle(vec2d p, double r) {
 	{
 		for(unsigned int i = 0; i < pointsInCircle; i++) {
 			double angle = ((2*PI*i)/pointsInCircle);
-			x = cos(angle);
-			y = sin(angle);
+			x = cos(angle)*r;
+			y = sin(angle)*r;
 			glVertex2d(zoom*(x+p.x-dx),zoom*(y+p.y-dy));
 		}
 	}
@@ -84,6 +84,9 @@ void display(void) {
 	glColor3f(1.0,1.0,1.0);
 	for(unsigned int i = 0; i < nParticles; i++) {
 		drawCircle(particles[i].getPosition(), particles[i].getRadius());
+		char b[32];
+		sprintf(b, "%.3f", particles[i].getForce());
+		printtext(zoom*(particles[i].getPosition().x-dx), zoom*(particles[i].getPosition().y-dy), b);
 	}
 	auto drawdt = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double> dur1, dur2;
@@ -180,10 +183,10 @@ int main(int narg, char** args) {
 		simulator = new enbody::NbodySim(512);
 		simulator->setDT(0.01);
 		simulator->setNormalSize(1, 0.5);
-		simulator->setNormalWeight(5.0, 1.0);
+		simulator->setNormalWeight(500000.0, 100.0);
 		//simulator->setWorkingSector(0,0);
 		simulator->initRNG(0);
-		simulator->addParticles(512,100.0);
+		simulator->addParticles(10,50.0);
 
 		//particles = simulator->enableReadBuffer();
 		particles = simulator->particleArrayPointer;

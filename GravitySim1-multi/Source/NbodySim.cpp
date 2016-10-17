@@ -315,6 +315,40 @@ void stepDwarf(void * particles, void * instr) {
 	delete ((instructions*) instr);
 }
 
+void resolveCollision(Particle* ball, Particle *ball2)
+{
+    // get the mtd
+    vec2d delta = ball->position-ball2->position;
+    double d = ball->position.dist(ball2->position);
+    // minimum translation distance to push balls apart after intersecting
+    vec2d mtd = delta * (((ball->getRadius() + ball2->getRadius())-d)/d);
+
+
+    // resolve intersection --
+    // inverse mass quantities
+    double im1 = 1 / ball->getMass();
+    double im2 = 1 / ball2->getMass();
+
+    // push-pull them apart based off their mass
+    ball->position += mtd*(im1 / (im1 + im2));
+    ball2->position -= mtd*(im2 / (im1 + im2));
+
+    // impact speed
+    vec2d v = (ball->velocity - (ball2->velocity));
+    double vn = v * (mtd.normalize());
+
+    // sphere intersecting but moving away from each other already
+    if (vn > 0.0f) return;
+
+    // collision impulse
+    double i = (-(1.0f + 0.85) * vn) / (im1 + im2);
+    vec2d impulse = mtd * i;
+
+    // change in momentum
+    ball->velocity += (impulse*im1);
+    ball2->velocity -= (impulse*im2);
+}
+
 void collisionDwarf(void * particles, void * instr) {
 	unsigned int myParticle = ((instructions*) instr)->from;
 	unsigned int nParticles = ((instructions*) instr)->nPart;
@@ -325,7 +359,15 @@ void collisionDwarf(void * particles, void * instr) {
 		if (!(i==myParticle)) {
 			if (p[myParticle].getDistance(p[i])<r+p[i].getRadius()) {
 				//collision
-
+				/* retarded
+				double insideDist = (r+p[i].getRadius()) - p[myParticle].getDistance(p[i]);
+				vec2d dir = p[myParticle].position.direction(p[i].position);
+				p[myParticle].position += (dir*insideDist)/2;
+				p[i].position -= (dir*insideDist)/2;
+				*/
+				//p[myParticle].velocity = -p[myParticle].velocity;
+				//p[i].velocity = -p[i].velocity;
+				resolveCollision(&p[myParticle], &p[i]);
 			}
 		}
 	}
@@ -343,6 +385,23 @@ void NbodySim::queueForce() {
 		a->from = i;
 		w.data = particleArrayPointer;
 		w.work = (void*) forceDwarf;
+		w.instructions = a;
+		myDwarves.emplaceWork(w);
+	}
+
+}
+
+void NbodySim::queueCollision() {
+
+	instructions* a;
+	Dwarves::Work w;
+
+	for (unsigned int i = 0; i < nParticles; i++) {
+		a = new instructions;
+		a->nPart = nParticles;
+		a->from = i;
+		w.data = particleArrayPointer;
+		w.work = (void*) collisionDwarf;
 		w.instructions = a;
 		myDwarves.emplaceWork(w);
 	}
@@ -386,7 +445,9 @@ void NbodySim::simloop() {
 
 		//queue operations
 		queueForce();
+		queueCollision();
 		queueStep();
+
 
 		//Help work
 		helpUpdate();
@@ -397,19 +458,20 @@ void NbodySim::simloop() {
 
 		//step time & wait
 		auto end = std::chrono::high_resolution_clock::now();
-		std::chrono::duration<double> dt = end - start;
+		std::chrono::nanoseconds dt = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
 		//wait
 		while (realtimeFraction == 0) {
 			std::this_thread::yield();
 		}
 		if (this->realtimeFraction >= 0) {
-			std::chrono::duration<int, std::nano> sleeptime =
-					std::chrono::duration<int, std::nano>((int)
-							(deltaT - (dt.count() * realtimeFraction))
-									* 1000000);
-			if (sleeptime.count() > 0)
+			long int sleept = (long int)(realtimeFraction*deltaT*1000000000)-(long int)dt.count();
+			std::chrono::duration<int, std::nano> sleeptime = std::chrono::duration<int, std::nano>(sleept);
+			//std::cout << "sleept: " << dt.count() << std::endl;
+			//std::cout << "sleep: " << sleeptime.count() << std::endl;
+			if (sleeptime.count() > 0) {
 				std::this_thread::__sleep_for(std::chrono::duration<int>(0),
 						sleeptime);
+			}
 			stimstepmutex.lock();
 			simsteptime = dt.count();
 			stimstepmutex.unlock();

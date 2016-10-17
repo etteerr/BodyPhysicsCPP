@@ -23,6 +23,11 @@ public:
 	vec2 operator+(const vec2& v) {
 		return vec2(x + v.x, y + v.y);
 	}
+
+	double operator*(const vec2& v) {
+			return (x * v.x + y * v.y);
+		}
+
 	vec2 operator-(const vec2& v) {
 		return vec2(x - v.x, y - v.y);
 	}
@@ -44,9 +49,17 @@ public:
 	vec2 operator-(const double &s) {
 		return vec2(x - s, y - s);
 	}
+
+	vec2& operator-() {
+		x = -x;
+		y = -y;
+		return *this;
+	}
+
 	vec2 operator*(const double &s) {
 		return vec2(x * s, y * s);
 	}
+
 	vec2 operator/(const double &s) {
 		return vec2(x / s, y / s);
 	}

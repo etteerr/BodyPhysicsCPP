@@ -50,7 +50,6 @@ public:
 	void step();
 
 
-private:
 	//Variable
 	double mass;
 	double radius;

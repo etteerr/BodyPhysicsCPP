@@ -164,7 +164,7 @@ vec2<double> Particle::calcForce(Particle& p) {
 void Particle::addForce(Particle& p) {
 	vec2d v = calcForce(p);
 	this->addForce(v);
-	p.addForce(v);
+	p.addForce(-v);
 }
 
 } /* namespace enbody */

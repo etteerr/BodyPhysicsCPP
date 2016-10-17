@@ -289,6 +289,7 @@ private:
 	void step();
 	void queueForce();
 	void queueStep();
+	void queueCollision();
 	void helpUpdate();
 	void simloop();
 
