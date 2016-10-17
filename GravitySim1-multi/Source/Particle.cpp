@@ -7,13 +7,15 @@
 
 #include "Particle.h"
 #include "NbodySim.h"
+#include <shared_mutex>
+
 #define G 0.0000000000667
 
 namespace enbody {
 
-std::mutex vwrite;
-std::mutex pwrite;
-std::mutex fwrite;
+std::shared_timed_mutex vwrite;
+std::shared_timed_mutex pwrite;
+std::shared_timed_mutex fwrite;
 
 Particle::Particle(double nMass, vec2<double> pos, double _radius){
 	mass = nMass;
@@ -36,16 +38,17 @@ double Particle::getMass() {
 
 vec2<double> Particle::getPosition() {
 	vec2<double> tmp;
-	pwrite.lock(); //Lock to prevent writing
+	std::shared_lock<std::shared_timed_mutex> lock(pwrite);
 	tmp = this->position;
-	pwrite.unlock();
+	lock.unlock();
 	return tmp;
 }
 
 void Particle::step() {
 	// Lock all variable to prevent strange shit
-	pwrite.lock();
-	fwrite.lock();
+	std::lock_guard<std::shared_timed_mutex> lock1(fwrite);
+	std::lock_guard<std::shared_timed_mutex> lock2(pwrite);
+	std::lock_guard<std::shared_timed_mutex> lock3(vwrite);
 
 	//Do step
 	{
@@ -54,86 +57,76 @@ void Particle::step() {
 		//Update pos
 		position += velocity * NbodySim::deltaT;
 		//reset force
-		this->setForce(0, 0);
+		force = vec2d(0,0);
 		//Normalize position
-		normalizePosition();
+		//normalizePosition();
 	}
-
-	pwrite.unlock();
-	fwrite.unlock();
-
 	return;
 }
 
 vec2<double> Particle::getVelocity() {
-	vwrite.lock();
+	std::shared_lock<std::shared_timed_mutex> lock(vwrite);
 	vec2<double> tmp = this->velocity;
-	vwrite.unlock();
+	lock.unlock();
 	return tmp;
 
 }
 
 vec2<double> Particle::getForce() {
-	fwrite.lock();
-	vec2<double> tmp = this->getForce();
-	fwrite.unlock();
+	std::shared_lock<std::shared_timed_mutex> lock(fwrite);
+	vec2<double> tmp = force;
+	lock.unlock();
 	return tmp;
 }
 
 void Particle::setForce(vec2<double>& nForce) {
-	fwrite.lock();
+	std::lock_guard<std::shared_timed_mutex> lock(fwrite);
 	this->force = nForce;
-	fwrite.unlock();
 }
 
 void Particle::addForce(vec2<double>& aForce) {
-	fwrite.lock();
+	std::lock_guard<std::shared_timed_mutex> lock(fwrite);
 	this->force += aForce;
-	fwrite.unlock();
 }
 
 //Private
 void Particle::setVelocity(vec2<double>& vel) {
-	vwrite.lock();
+	std::lock_guard<std::shared_timed_mutex> lock(vwrite);
 	this->velocity = vel;
-	vwrite.unlock();
 }
 
 void Particle::setForce(double x, double y) {
-	fwrite.lock();
+	std::lock_guard<std::shared_timed_mutex> lock(fwrite);
 	this->force.x = x;
 	this->force.y = y;
-	fwrite.unlock();
 }
 
 //Private
 void Particle::addVelocity(vec2<double>& vel) {
-	vwrite.lock();
+	std::lock_guard<std::shared_timed_mutex> lock(vwrite);
 	this->velocity += vel;
-	vwrite.unlock();
 }
 
 vec2<double> Particle::getSector() {
 	vec2<double> tmp;
-	pwrite.lock();
+	std::shared_lock<std::shared_timed_mutex> lock(pwrite);
 	tmp = sector;
-	pwrite.unlock();
+	lock.unlock();
 	return tmp;
 }
 
 vec2<double> Particle::getNormPosition() {
 	vec2<double> tmp;
-	pwrite.lock();
+	std::shared_lock<std::shared_timed_mutex> lock(pwrite);
 	tmp = sector;
 	tmp += position;
-	pwrite.unlock();
+	lock.unlock();
 	return tmp;
 }
 
 void Particle::addForce(double x, double y) {
-	fwrite.lock();
+	std::lock_guard<std::shared_timed_mutex> lock(fwrite);
 	force += vec2<double>(x, y);
-	fwrite.unlock();
 }
 
 

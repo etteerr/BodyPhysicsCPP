@@ -24,7 +24,7 @@ Dwarves::~Dwarves() {
 void Dwarves::recruit(int workers) {
 	dismissal = false;
 	nDwarves = 0;
-	dwarves = new std::thread[workers-1];
+	dwarves = new std::thread[workers];
 	for(int i = 0; i < workers; i++) {
 		dwarves[nDwarves] = std::thread(&Dwarves::dwarf, this);
 		dwarves[nDwarves++].detach();

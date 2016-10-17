@@ -160,7 +160,7 @@ public:
 	 * Particles are generated with random weights based on the global mean weight +- sd
 	 * Idem for size
 	 */
-	void addParticles(unsigned int);
+	void addParticles(unsigned int, double);
 	/**
 	 * Adds particles in a bound region between min and max where
 	 * 	0 < min < max && min < max < 1
@@ -215,7 +215,7 @@ public:
 	 *
 	 */
 	void setRealtimeFraction(double x);
-	double getRealtimeFraction() { return realtimeFraction };
+	double getRealtimeFraction() { return realtimeFraction; };
 
 	/**
 	 * pauseSimulation()
@@ -259,9 +259,11 @@ public:
 	 */
 	double getDistance(Particle&, Particle&);
 
+	unsigned int getSimulatedSteps() { return cstep; };
+	Particle* particleArrayPointer;
 private:
 	//Particles (memory and current working stuff)
-	Particle* particleArrayPointer;
+
 	unsigned int nParticles = 0;
 	unsigned int particleArraySize;
 	unsigned int freeSpacePointer = 0; //Points to the first free space in particleArray
@@ -299,7 +301,7 @@ private:
 	std::mutex stimstepmutex;
 	unsigned long int buffCstep;
 	unsigned long int cstep = 0;
-	std::mutex bufferMutex;
+	std::timed_mutex bufferMutex;
 	Particle * buffer;
 	unsigned int buffersize;
 	bool simrunning = false;

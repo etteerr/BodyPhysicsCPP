@@ -12,7 +12,7 @@
 #include <math.h>
 #include <queue>
 #include <time.h>
-
+#include <iostream>
 namespace enbody {
 double NbodySim::deltaT = 0;
 
@@ -195,7 +195,7 @@ double enbody::NbodySim::getNormalSizeSD() {
 /************************************
  *  Particle control (add/remove)
  ************************************/
-void enbody::NbodySim::addParticles(unsigned int nParticles) {
+void enbody::NbodySim::addParticles(unsigned int nParticles, double locscale) {
 
 	if (getFreeSpace() < nParticles)
 		increaseAlloc(nParticles - getFreeSpace());
@@ -207,7 +207,7 @@ void enbody::NbodySim::addParticles(unsigned int nParticles) {
 	//Add particles
 
 	for (unsigned int i = 0; i < nParticles; i++) {
-		Particle par(normMass(gen), uniLoc(gen), uniLoc(gen), normSize(gen));
+		Particle par(normMass(gen), uniLoc(gen)*locscale, uniLoc(gen)*locscale, normSize(gen));
 		addParticle(par);
 	}
 }
@@ -220,9 +220,10 @@ void enbody::NbodySim::addParticle(Particle particle) {
 	if (getFreeSpace() == 0)
 		increaseAlloc(10);
 
-	if (getFreeSpace() > 0)
+	if (getFreeSpace() > 0) {
 		particleArrayPointer[freeSpacePointer++] = particle;
-	else
+		nParticles++;
+	}else
 		setError(memoryError, "No free memory available");
 }
 
@@ -243,7 +244,7 @@ void NbodySim::startSimulation() {
 	unsigned int nDwarves = std::thread::hardware_concurrency();
 	if (nDwarves==0)
 		nDwarves = 3;
-	myDwarves.recruit(nDwarves); //Might return 0!
+	myDwarves.recruit(nDwarves-1); //Might return 0!
 
 	//start simloop thread
 	simthread = std::thread(&NbodySim::simloop, this);
@@ -259,12 +260,14 @@ void NbodySim::pauseSimulation() {
 	if (realtimeFraction == 0)
 		return;
 	pauseRealtimeFraction = realtimeFraction;
+	realtimeFraction = 0;
 }
 
 void NbodySim::resumeSimulation() {
 	if (realtimeFraction != 0 || pauseRealtimeFraction == 0)
 		return;
 	realtimeFraction = pauseRealtimeFraction;
+	pauseRealtimeFraction = 0;
 }
 
 void NbodySim::resumeSimulation(double x) {
@@ -309,6 +312,23 @@ void forceDwarf(void * particles, void * instr) {
 
 void stepDwarf(void * particles, void * instr) {
 	((Particle*) particles)[((instructions*) instr)->from].step();
+	delete ((instructions*) instr);
+}
+
+void collisionDwarf(void * particles, void * instr) {
+	unsigned int myParticle = ((instructions*) instr)->from;
+	unsigned int nParticles = ((instructions*) instr)->nPart;
+	Particle * p = (Particle *)particles;
+	double r;
+	r = p[myParticle].getRadius();
+	for (unsigned int i = 0; i < nParticles; i++){
+		if (!(i==myParticle)) {
+			if (p[myParticle].getDistance(p[i])<r+p[i].getRadius()) {
+				//collision
+
+			}
+		}
+	}
 	delete ((instructions*) instr);
 }
 
@@ -371,6 +391,7 @@ void NbodySim::simloop() {
 		//Help work
 		helpUpdate();
 
+		cstep++;
 		//done with step
 		bufferMutex.unlock();
 
@@ -378,10 +399,10 @@ void NbodySim::simloop() {
 		auto end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> dt = end - start;
 		//wait
+		while (realtimeFraction == 0) {
+			std::this_thread::yield();
+		}
 		if (this->realtimeFraction >= 0) {
-			while (realtimeFraction == 0) {
-				std::this_thread::yield();
-			}
 			std::chrono::duration<int, std::nano> sleeptime =
 					std::chrono::duration<int, std::nano>((int)
 							(deltaT - (dt.count() * realtimeFraction))
@@ -401,7 +422,7 @@ Particle* NbodySim::enableReadBuffer() {
 	if (buffer != NULL)
 		return buffer;
 
-	buffer = (Particle*) alloca(nParticles * sizeof(Particle));
+	buffer = (Particle*) malloc(nParticles * sizeof(Particle));
 	memcpy(buffer, particleArrayPointer, nParticles * sizeof(Particle));
 	buffCstep = cstep;
 	buffersize = nParticles;
@@ -415,7 +436,6 @@ bool NbodySim::updateBuffer() {
 	if (buffCstep == cstep)
 		return true;
 
-	std::lock_guard<std::mutex> lock(bufferMutex);
 	//adjust size
 	if (!(nParticles == buffersize)) {
 		Particle* newb = (Particle*) realloc(buffer, nParticles * sizeof(Particle));
@@ -425,7 +445,12 @@ bool NbodySim::updateBuffer() {
 		buffer = newb;
 	}
 	//update buffer
-	memcpy(buffer, particleArrayPointer, nParticles * sizeof(Particle));
+	if (bufferMutex.try_lock_for(std::chrono::milliseconds(64))){
+		memcpy(buffer, particleArrayPointer, nParticles * sizeof(Particle));
+		buffCstep = cstep;
+		bufferMutex.unlock();
+		std::cout << "update" << std::endl;
+	}
 	return true;
 }
 
