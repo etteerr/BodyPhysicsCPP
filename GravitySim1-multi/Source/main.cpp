@@ -84,9 +84,6 @@ void display(void) {
 	glColor3f(1.0,1.0,1.0);
 	for(unsigned int i = 0; i < nParticles; i++) {
 		drawCircle(particles[i].getPosition(), particles[i].getRadius());
-		char b[32];
-		sprintf(b, "%.3f", particles[i].getForce());
-		printtext(zoom*(particles[i].getPosition().x-dx), zoom*(particles[i].getPosition().y-dy), b);
 	}
 	auto drawdt = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double> dur1, dur2;
@@ -97,7 +94,7 @@ void display(void) {
 	ms2 = std::chrono::duration_cast<std::chrono::milliseconds>(dur2);
 	glColor3f(1.0,1.0,1.0);
 	char a[120];
-	sprintf(a,"SimSpeed %.2f    simstep: %i   dtGet: %i    dtDraw: %i", simulator->getRealtimeFraction(), simulator->getSimulatedSteps(), ms1.count(), ms2.count());
+	sprintf(a,"SimSpeed %.2f    simstep: %i   dtDraw: %i", simulator->getRealtimeFraction(), simulator->getSimulatedSteps(), ms2.count());
 	printtext(10,30,a);
 	char str[64];
 	sprintf(str,"Zoom: %.4f   loc: %.2f:%.2f    time: %.5f", zoom, dx,dy,(double)simulator->getSimulatedSteps()*simulator->deltaT);
@@ -105,6 +102,7 @@ void display(void) {
 	glFlush();
 	glFinish();
 	glutSwapBuffers();
+	this_thread::sleep_for(std::chrono_literals::operator ""ms(15));
 }
 
 
@@ -186,7 +184,7 @@ int main(int narg, char** args) {
 		simulator->setNormalWeight(500000.0, 100.0);
 		//simulator->setWorkingSector(0,0);
 		simulator->initRNG(0);
-		simulator->addParticles(10,50.0);
+		simulator->addParticles(100,100.0);
 
 		//particles = simulator->enableReadBuffer();
 		particles = simulator->particleArrayPointer;
