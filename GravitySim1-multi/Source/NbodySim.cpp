@@ -473,7 +473,7 @@ void NbodySim::simloop() {
 						sleeptime);
 			}
 			stimstepmutex.lock();
-			simsteptime = dt.count();
+			simsteptime = (double)dt.count()/1000000.0;
 			stimstepmutex.unlock();
 		}
 	}

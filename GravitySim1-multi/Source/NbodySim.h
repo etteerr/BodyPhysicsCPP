@@ -260,6 +260,7 @@ public:
 	double getDistance(Particle&, Particle&);
 
 	unsigned int getSimulatedSteps() { return cstep; };
+	double getCalcTime() { return simsteptime; };
 	Particle* particleArrayPointer;
 private:
 	//Particles (memory and current working stuff)

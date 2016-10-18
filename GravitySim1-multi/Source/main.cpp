@@ -2,6 +2,7 @@
 #include <GL/gl.h>
 #include <string>
 #include <iostream>
+#include <fstream>
 #include <chrono>
 #define nbodyerrorverbose 1
 #define PI 3.141592653589793238
@@ -81,7 +82,7 @@ void display(void) {
 	//	exit(1);
 	//auto getdt = std::chrono::high_resolution_clock::now();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ACCUM_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-	glColor3f(1.0,1.0,1.0);
+	glColor3f(0,.4,1.0);
 	for(unsigned int i = 0; i < nParticles; i++) {
 		drawCircle(particles[i].getPosition(), particles[i].getRadius());
 	}
@@ -94,10 +95,10 @@ void display(void) {
 	ms2 = std::chrono::duration_cast<std::chrono::milliseconds>(dur2);
 	glColor3f(1.0,1.0,1.0);
 	char a[120];
-	sprintf(a,"SimSpeed %.2f    simstep: %i   dtDraw: %i", simulator->getRealtimeFraction(), simulator->getSimulatedSteps(), ms2.count());
+	sprintf(a,"SimSpeed %.8f  simstep: %i   dtDraw: %i    dtCalc: %.5f", simulator->getRealtimeFraction(), simulator->getSimulatedSteps(), ms2.count(), simulator->getCalcTime());
 	printtext(10,30,a);
 	char str[64];
-	sprintf(str,"Zoom: %.4f   loc: %.2f:%.2f    time: %.5f", zoom, dx,dy,(double)simulator->getSimulatedSteps()*simulator->deltaT);
+	sprintf(str,"Zoom: %.8f  loc: %.2f:%.2f    time: %.5f", zoom, dx,dy,(double)simulator->getSimulatedSteps()*simulator->deltaT);
 	printtext(10,10,str);
 	glFlush();
 	glFinish();
@@ -123,10 +124,10 @@ void keyboard(int key, int mouse_x, int mouse_y) {
 	}
 
 	if (key == GLUT_KEY_PAGE_UP) {
-		simulator->setRealtimeFraction(simulator->getRealtimeFraction() + 0.01);
+		simulator->setRealtimeFraction(simulator->getRealtimeFraction() * 1.1);
 	}
 	if (key == GLUT_KEY_PAGE_DOWN) {
-		simulator->setRealtimeFraction(simulator->getRealtimeFraction() - 0.01);
+		simulator->setRealtimeFraction(simulator->getRealtimeFraction() / 1.1);
 	}
 
 	if (key == GLUT_KEY_F5) {
@@ -160,7 +161,9 @@ void mouse(int button, int state, int x, int y) {
 }
 
 
+void parsecmd(int narg, char** args) {
 
+}
 
 int main(int narg, char** args) {
 	using namespace std;
@@ -170,32 +173,25 @@ int main(int narg, char** args) {
 	//	mean mass
 	//  sd mass
 	// nparticles
-	if (narg !=  5) {
-		cout << "Using default values..." << endl
-			 << "Use GravitySim1-multi [spread] [meanMass] [sdMass] [nParticles]" << endl
-			 << "[spread] = 0.0 0.0 1.0 1.0		Means from (0,0) to (1,1) particles may appear" << endl
-			 << "[meanMass] = 10.0  		    Means mass is 10.0 +- sdMass" << endl
-			 << "[sdMass] = 5.0					Means see [meanMass]" << endl
-			 << "[nParticles] = 1024			Means amount of particles to generate" << endl;
-		//Init default
-		simulator = new enbody::NbodySim(512);
-		simulator->setDT(0.01);
-		simulator->setNormalSize(1, 0.5);
-		simulator->setNormalWeight(500000.0, 100.0);
-		//simulator->setWorkingSector(0,0);
-		simulator->initRNG(0);
-		simulator->addParticles(100,100.0);
 
-		//particles = simulator->enableReadBuffer();
-		particles = simulator->particleArrayPointer;
+	//Init default
+	simulator = new enbody::NbodySim(8);
+	simulator->setDT(1.0);
+	simulator->setNormalSize(100, 50);
+	simulator->setNormalWeight(5000000000000.0, 1000.0);
+	//simulator->setWorkingSector(0,0);
+	simulator->initRNG(0);
 
-		simulator->setRealtimeFraction(1);
-		simulator->pauseSimulation();
-		simulator->startSimulation();
+	//particles = simulator->enableReadBuffer();
+	particles = simulator->particleArrayPointer;
 
+	simulator->addParticles(30, 1000.0);
 
-	}else
-		return 1;
+	//Init sim (start paused)
+	simulator->setRealtimeFraction(1);
+	simulator->pauseSimulation();
+	simulator->startSimulation();
+
 
 	//Init openGL
 	glutInit(&narg, args);
