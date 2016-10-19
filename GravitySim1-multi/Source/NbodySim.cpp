@@ -257,11 +257,14 @@ void NbodySim::setRealtimeFraction(double x) {
 	realtimeFraction = x;
 }
 static bool paused = false;
+bool NbodySim::isPaused() {
+	return paused;
+}
 void NbodySim::pauseSimulation() {
 	if (paused)
 		return;
-	pauseRealtimeFraction = realtimeFraction;
-	realtimeFraction = 0;
+	//pauseRealtimeFraction = realtimeFraction;
+	//realtimeFraction = 0;
 	paused = true; // prevend deadlock
 	bufferMutex.lock(); //wait until paused and sure lock it
 }
@@ -270,8 +273,8 @@ void NbodySim::resumeSimulation() {
 	if (!paused)//prevent unjust unlock and var change
 		return;
 	paused = false;
-	realtimeFraction = pauseRealtimeFraction;
-	pauseRealtimeFraction = 0;
+	//realtimeFraction = pauseRealtimeFraction;
+	//pauseRealtimeFraction = 0;
 	bufferMutex.unlock();
 }
 
@@ -340,7 +343,7 @@ void resolveCollision(Particle* ball, Particle *ball2)
 
     // impact speed
     vec2d v = (ball->velocity - (ball2->velocity));
-    double vn = v * (mtd.normalize());
+    double vn = v * (mtd.getnormalize());
 
     // sphere intersecting but moving away from each other already
     if (vn > 0.0f) return;

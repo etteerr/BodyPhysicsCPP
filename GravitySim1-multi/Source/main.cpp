@@ -82,13 +82,17 @@ void drawTrace() {
 	double x,y;
 	unsigned int csteps = simulator->getSimulatedSteps();
 	glBegin(GL_POINTS);
-	for(unsigned int j = 0; j < simulator->nLoggers; j++)
-		for(unsigned int i = 0; i < csteps; i++) {
+	std::lock_guard<std::mutex> lock(simulator->loggerlock);
+	for(unsigned int j = 0; j < simulator->nLoggers; j++) {
+		int i = 0;
+		for(auto it = simulator->loggers[j].log.begin(); it != simulator->loggers[j].log.end(); it++) {
 			glColor3d((double)i/(double)csteps, 1.0-((double)i/(double)csteps), 0.0);
-			x = simulator->loggers[j].log[i].x;
-			y = simulator->loggers[j].log[i].y;
+			x = (*it).x;
+			y = (*it).y;
 			glVertex2d(zoom*(x-dx),zoom*(y-dy));
+			i++;
 		}
+	}
 	glEnd();
 	}catch(std::exception * e) {
 		//cout << e->what() << endl;
@@ -187,7 +191,7 @@ bool parseCommand(string incommands) {
 	unsigned int _nParticles = simulator->getNParticles();
 	std::istringstream iss;
 	iss.str(incommands);
-	std::string commands[10],command;
+	std::string commands[256],command;
 	int i = 0;
 	std::string item;
 	while(std::getline(iss, item, ' ')) {
@@ -202,7 +206,7 @@ bool parseCommand(string incommands) {
 	static bool hasSelected = false;
 
 	//vars
-	bool wasPaused = simulator->getRealtimeFraction()==0;
+	bool wasPaused = simulator->isPaused();
 
 	//stand alone commands
 
@@ -231,6 +235,15 @@ bool parseCommand(string incommands) {
 		simulator->addParticles(n,s,vec2d(x,y));
 		if (!wasPaused) simulator->resumeSimulation();
 		return true;
+	}
+	if (command == string("setview"))
+	{
+		if (nargs == 3){
+			dx = atof(commands[i++].data());
+			dy = atof(commands[i++].data());
+			return true;
+		}
+		return false;
 	}
 
 	if (command == string("wait")) { //wait in seconds  (simulator time)
@@ -543,7 +556,7 @@ int main(int narg, char** args) {
 
 	//Init default
 	simulator = new enbody::NbodySim(8);
-	simulator->setDT(1.0);
+	simulator->setDT(100.0);
 	simulator->setNormalSize(100, 50);
 	simulator->setNormalWeight(5000000000000.0, 1000.0);
 	//simulator->setWorkingSector(0,0);

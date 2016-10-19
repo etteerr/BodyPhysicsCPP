@@ -107,6 +107,12 @@ public:
 		return *this;
 	}
 
+	vec2 getnormalize() {
+			if (length() == 0) return *this;
+
+			return (*this) * (1.0 / length());
+		}
+
 	float dist(const vec2& v) const {
 		vec2 d(v.x - x, v.y - y);
 		return d.length();

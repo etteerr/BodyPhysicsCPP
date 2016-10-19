@@ -272,6 +272,7 @@ public:
 	logger loggers[20];
 	unsigned int nLoggers = 0;
 	void processLoggers() {
+		std::lock_guard<std::mutex> lock(loggerlock);
 		for (unsigned int i = 0; i < nLoggers; i++)
 			this->loggers[i].log.push_back(particleArrayPointer[loggers[i].id].position);
 	};
@@ -287,6 +288,8 @@ public:
 		l.log = std::vector<vec2d>();
 		loggers[nLoggers++] = l;
 	};
+	bool isPaused();
+	std::mutex loggerlock;
 private:
 	//Particles (memory and current working stuff)
 
