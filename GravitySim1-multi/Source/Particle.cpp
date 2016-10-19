@@ -31,6 +31,13 @@ Particle::Particle(double nMass, double x, double y, double _radius) {
 	position = pos;
 }
 
+Particle::Particle() {
+	mass = 0;
+	radius = 0;
+	vec2d pos(0,0);
+	position = pos;
+}
+
 
 double Particle::getMass() {
 	return mass;

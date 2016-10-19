@@ -5,12 +5,11 @@
  *      Author: erwin
  */
 
-#ifndef NBODYSIM_H_
-#define NBODYSIM_H_
-
 #ifndef nbodyerrorverbose
 #define nbodyerrorverbose 0
 #endif
+#ifndef NBODYSIM_H_
+#define NBODYSIM_H_
 
 #include "vec2.h"
 #include "Particle.h"
@@ -37,6 +36,11 @@ struct Error {
 struct instructions {
 		unsigned int from;
 		unsigned int nPart;
+};
+
+struct logger {
+	unsigned int id;
+	std::vector<vec2d> log;
 };
 
 class NbodySim {
@@ -160,7 +164,7 @@ public:
 	 * Particles are generated with random weights based on the global mean weight +- sd
 	 * Idem for size
 	 */
-	void addParticles(unsigned int, double);
+	void addParticles(unsigned int, double, vec2d);
 	/**
 	 * Adds particles in a bound region between min and max where
 	 * 	0 < min < max && min < max < 1
@@ -262,6 +266,27 @@ public:
 	unsigned int getSimulatedSteps() { return cstep; };
 	double getCalcTime() { return simsteptime; };
 	Particle* particleArrayPointer;
+
+	//TODO: move implementation
+	//logger
+	logger loggers[20];
+	unsigned int nLoggers = 0;
+	void processLoggers() {
+		for (unsigned int i = 0; i < nLoggers; i++)
+			this->loggers[i].log.push_back(particleArrayPointer[loggers[i].id].position);
+	};
+	/**
+	 * adds a logger to a particle
+	 * everyXsteps: log the position every x steps
+	 */
+	void addLogger(unsigned int id) {
+		if (nLoggers>=20-1)
+			return;
+		logger l;
+		l.id = id;
+		l.log = std::vector<vec2d>();
+		loggers[nLoggers++] = l;
+	};
 private:
 	//Particles (memory and current working stuff)
 
@@ -269,6 +294,7 @@ private:
 	unsigned int particleArraySize;
 	unsigned int freeSpacePointer = 0; //Points to the first free space in particleArray
 	vec2<int> workingSector;
+
 
 	//Generation variables
 	double meanWeight = 0;
@@ -311,7 +337,7 @@ private:
 
 	//Error handling
 	Error myError;
-#define setError(E,M) _setError((errorType)E,std::string(M), int(__LINE__), std::string(__FILE__), nbodyerrorverbose)
+#define setError(E,M) _setError((errorType)E,std::string(M), int(__LINE__), std::string(__FILE__), 1)
 	void _setError(errorType, std::string message, int line, std::string file, bool print);
 };
 

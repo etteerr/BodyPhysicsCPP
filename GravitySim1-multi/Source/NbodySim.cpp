@@ -195,7 +195,7 @@ double enbody::NbodySim::getNormalSizeSD() {
 /************************************
  *  Particle control (add/remove)
  ************************************/
-void enbody::NbodySim::addParticles(unsigned int nParticles, double locscale) {
+void enbody::NbodySim::addParticles(unsigned int nParticles, double locscale, vec2d start) {
 
 	if (getFreeSpace() < nParticles)
 		increaseAlloc(nParticles - getFreeSpace());
@@ -207,8 +207,9 @@ void enbody::NbodySim::addParticles(unsigned int nParticles, double locscale) {
 	//Add particles
 
 	for (unsigned int i = 0; i < nParticles; i++) {
-		Particle par(normMass(gen), uniLoc(gen)*locscale, uniLoc(gen)*locscale, normSize(gen));
+		Particle par(normMass(gen), ((uniLoc(gen)-0.5)*2.0*locscale)+start.x, ((uniLoc(gen)-0.5)*2.0*locscale)+start.y, normSize(gen));
 		addParticle(par);
+
 	}
 }
 
@@ -255,19 +256,23 @@ void NbodySim::startSimulation() {
 void NbodySim::setRealtimeFraction(double x) {
 	realtimeFraction = x;
 }
-
+static bool paused = false;
 void NbodySim::pauseSimulation() {
-	if (realtimeFraction == 0)
+	if (paused)
 		return;
 	pauseRealtimeFraction = realtimeFraction;
 	realtimeFraction = 0;
+	paused = true; // prevend deadlock
+	bufferMutex.lock(); //wait until paused and sure lock it
 }
 
 void NbodySim::resumeSimulation() {
-	if (realtimeFraction != 0 || pauseRealtimeFraction == 0)
+	if (!paused)//prevent unjust unlock and var change
 		return;
+	paused = false;
 	realtimeFraction = pauseRealtimeFraction;
 	pauseRealtimeFraction = 0;
+	bufferMutex.unlock();
 }
 
 void NbodySim::resumeSimulation(double x) {
@@ -452,6 +457,9 @@ void NbodySim::simloop() {
 		//Help work
 		helpUpdate();
 
+		//update loggers
+		this->processLoggers();
+
 		cstep++;
 		//done with step
 		bufferMutex.unlock();
@@ -464,7 +472,7 @@ void NbodySim::simloop() {
 			std::this_thread::yield();
 		}
 		if (this->realtimeFraction >= 0) {
-			long int sleept = (long int)(realtimeFraction*deltaT*1000000000)-(long int)dt.count();
+			long int sleept = (long int)((deltaT/realtimeFraction)*1000000000)-(long int)dt.count();
 			std::chrono::duration<int, std::nano> sleeptime = std::chrono::duration<int, std::nano>(sleept);
 			//std::cout << "sleept: " << dt.count() << std::endl;
 			//std::cout << "sleep: " << sleeptime.count() << std::endl;

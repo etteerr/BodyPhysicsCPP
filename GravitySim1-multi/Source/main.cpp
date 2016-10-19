@@ -3,8 +3,9 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <chrono>
-#define nbodyerrorverbose 1
+#define nbodyerrorverbose 0
 #define PI 3.141592653589793238
 #define pointsInCircle 120
 #include "NbodySim.h"
@@ -75,9 +76,29 @@ void drawCircle(vec2d p, double r) {
 
 }
 
+void drawTrace() {
+	try {
+	glPointSize(1.0);
+	double x,y;
+	unsigned int csteps = simulator->getSimulatedSteps();
+	glBegin(GL_POINTS);
+	for(unsigned int j = 0; j < simulator->nLoggers; j++)
+		for(unsigned int i = 0; i < csteps; i++) {
+			glColor3d((double)i/(double)csteps, 1.0-((double)i/(double)csteps), 0.0);
+			x = simulator->loggers[j].log[i].x;
+			y = simulator->loggers[j].log[i].y;
+			glVertex2d(zoom*(x-dx),zoom*(y-dy));
+		}
+	glEnd();
+	}catch(std::exception * e) {
+		//cout << e->what() << endl;
+	}
+}
+
 void display(void) {
 	auto start = std::chrono::high_resolution_clock::now();
 	nParticles = simulator->getNParticles();
+	particles = simulator->particleArrayPointer;
 	//if (!simulator->updateBuffer())
 	//	exit(1);
 	//auto getdt = std::chrono::high_resolution_clock::now();
@@ -86,6 +107,7 @@ void display(void) {
 	for(unsigned int i = 0; i < nParticles; i++) {
 		drawCircle(particles[i].getPosition(), particles[i].getRadius());
 	}
+	drawTrace();
 	auto drawdt = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double> dur1, dur2;
 	//dur1 = getdt - start;
@@ -95,7 +117,7 @@ void display(void) {
 	ms2 = std::chrono::duration_cast<std::chrono::milliseconds>(dur2);
 	glColor3f(1.0,1.0,1.0);
 	char a[120];
-	sprintf(a,"SimSpeed %.8f  simstep: %i   dtDraw: %i    dtCalc: %.5f", simulator->getRealtimeFraction(), simulator->getSimulatedSteps(), ms2.count(), simulator->getCalcTime());
+	sprintf(a,"SimSpeed %.8f  simstep: %i   dtDraw: %i    dtCalc: %.5f", simulator->getRealtimeFraction(), simulator->getSimulatedSteps(), (int)ms2.count(), simulator->getCalcTime());
 	printtext(10,30,a);
 	char str[64];
 	sprintf(str,"Zoom: %.8f  loc: %.2f:%.2f    time: %.5f", zoom, dx,dy,(double)simulator->getSimulatedSteps()*simulator->deltaT);
@@ -124,10 +146,10 @@ void keyboard(int key, int mouse_x, int mouse_y) {
 	}
 
 	if (key == GLUT_KEY_PAGE_UP) {
-		simulator->setRealtimeFraction(simulator->getRealtimeFraction() * 1.1);
+		simulator->setRealtimeFraction(simulator->getRealtimeFraction() + 0.01);
 	}
 	if (key == GLUT_KEY_PAGE_DOWN) {
-		simulator->setRealtimeFraction(simulator->getRealtimeFraction() / 1.1);
+		simulator->setRealtimeFraction(simulator->getRealtimeFraction() - 0.01);
 	}
 
 	if (key == GLUT_KEY_F5) {
@@ -160,13 +182,358 @@ void mouse(int button, int state, int x, int y) {
 	}
 }
 
+bool parsescript(std::string file); //required
+bool parseCommand(string incommands) {
+	unsigned int _nParticles = simulator->getNParticles();
+	std::istringstream iss;
+	iss.str(incommands);
+	std::string commands[10],command;
+	int i = 0;
+	std::string item;
+	while(std::getline(iss, item, ' ')) {
+		commands[i++] = item;
+	}
+	int nargs = i;
+	i = 0;
+	command = commands[i++];
 
-void parsecmd(int narg, char** args) {
+	//static variables
+	static unsigned int selected = 0;
+	static bool hasSelected = false;
+
+	//vars
+	bool wasPaused = simulator->getRealtimeFraction()==0;
+
+	//stand alone commands
+
+	if (command == string("script")) {
+		simulator->pauseSimulation();
+		string f = commands[i++];
+		if (!parsescript(f)) {
+			cout << "failed to parse script" << endl;
+			return false;
+		}
+		if (!wasPaused) simulator->resumeSimulation();
+		return true;
+	}
+
+	if (command == string("addrng")) {
+		if (nargs < 5) {
+			cout << "Invalid usage" << endl <<
+					"Use: addrng [amount] [scale] [startx] [starty]" << endl;
+			return false;
+		}
+		simulator->pauseSimulation();
+		int n = atoi(commands[i++].data());
+		double s = atof(commands[i++].data());
+		int x = atof(commands[i++].data());
+		int y = atof(commands[i++].data());
+		simulator->addParticles(n,s,vec2d(x,y));
+		if (!wasPaused) simulator->resumeSimulation();
+		return true;
+	}
+
+	if (command == string("wait")) { //wait in seconds  (simulator time)
+		command = commands[i++];
+		if (command == string("until")) { //wait until simulator time
+			double t;
+			t = atof(commands[i++].data());
+			while (t > (simulator->deltaT*(double)simulator->getSimulatedSteps())) {
+				this_thread::yield();
+			}
+		}else
+		if (command == string("for")) {
+			double t;
+			t = atof(commands[i++].data());
+			t+=(simulator->deltaT*(double)simulator->getSimulatedSteps());
+			while (t > (simulator->deltaT*(double)simulator->getSimulatedSteps())) {
+				this_thread::yield();
+			}
+		}else {
+			cout << "Invalid usage of wait." << endl <<
+					"use: wait for [time in seconds] " << endl <<
+					"or" << endl <<
+					"wait until [time in seconds]" << endl <<
+					"where time is simulator time, not real time." << endl;
+		}
+		return true;
+	}
+
+	if (command == string("quit")) {
+		exit(0);//TODO: Dont do this
+	}
+	if (command == string("savelog")) {
+		simulator->pauseSimulation();
+		fstream f;
+		f.open("logger.csv", fstream::out | fstream::app);
+		for(unsigned int i = 0; i < simulator->nLoggers; i++) {
+			f << simulator->loggers[i].id << ";";
+		}
+		f << endl;
+		for (unsigned int j = 0; j < simulator->getSimulatedSteps(); j++) {
+			for(unsigned int i = 0; i < simulator->nLoggers; i++) {
+				f << simulator->loggers[i].log[j].x << "-" << simulator->loggers[i].log[j].y << ";";
+			}
+			f << endl;
+		}
+		f.close();
+		if (!wasPaused) simulator->resumeSimulation();
+		return true;
+	}
+
+	if (command == string("addlog")) {
+		simulator->pauseSimulation();
+		simulator->addLogger(stoul(commands[i++].data()));
+		if (!wasPaused) simulator->resumeSimulation();
+		return true;
+	}
+
+	if (command == string("add")) {
+		simulator->pauseSimulation();
+		enbody::Particle newPar;
+		double speed,x,y,px,py;
+		if (nargs>1) { //args given
+			while(i < nargs) {
+				command = commands[i++];
+				if (command == string("weight")) {
+					newPar.mass = atof(commands[i++].data());
+				}
+				if (command == string("speed")) {
+
+					speed = atof(commands[i++].data());
+				}
+				if (command == string("direction")) {
+					x = atof(commands[i++].data());
+					y = atof(commands[i++].data());
+				}
+				if (command == string("position")) {
+					px = atof(commands[i++].data());
+					py = atof(commands[i++].data());
+				}
+				if (command == string("radius")) {
+					newPar.radius = atof(commands[i++].data());
+				}
+			}
+
+		}else {
+			cout << "weight: ";
+			cin >> newPar.mass;
+			cout << endl << "direction x: ";
+			cin >> x;
+			cout << endl << "direction y: ";
+			cin >> y;
+			cout << endl << "position x: ";
+			cin >> px;
+			cout << endl << "position y: ";
+			cin >> py;
+			cout << endl << "speed: ";
+			cin >> speed;
+			cout << endl << "radius: ";
+			cin >> newPar.radius;
+			cout << endl;
+		}
+		newPar.velocity = vec2d(x,y).normalize() * speed;
+		newPar.position = vec2d(px,py);
+		simulator->addParticle(newPar);
+		if (!wasPaused) simulator->resumeSimulation();
+		return true;
+	}
+
+	if (command == string("select")) {
+		selected = stoul(commands[i++].data());
+		if (selected < 0 || selected >= _nParticles) {
+			cout << "Invalid selected" << endl;
+			selected = 0;
+			return false;
+		}
+		hasSelected = true;
+		return true;
+	}
+
+	if (command == string("unselect")) {
+		hasSelected = false;
+		return true;
+	}
+
+	if (command == string("list")) {
+		for (unsigned int i = 0; i < _nParticles; i++)
+			particles[i].print(i);
+		return true;
+	}
+
+	if (command == string("identify")) {
+		simulator->pauseSimulation();
+		//print id for every planet
+		//if (!wasPaused) simulator->resumeSimulation();
+		cout << "Simulation automatically paused" << endl;
+		return true;
+	}
+	if (command == string("pause")) {
+		simulator->pauseSimulation();
+		return true;
+	}
+	if (command == string("resume")) {
+		simulator->resumeSimulation();
+		return true;
+	}
+	if (command == string("setSpeed")) {
+		double speed;
+		speed = atof(commands[i++].data());
+		simulator->setRealtimeFraction(speed);
+		return true;
+	}
+	//Command parsing 	(may be used as command [particle] [args]
+	// 					 or as command [args] when select was used
+	while(i<=nargs) {
+		if (command == string("remove")) {
+			cout << "Unimplemented!" << endl;
+			return false;
+		}
+		if (command == string("vars")) {
+			simulator->pauseSimulation();
+			if (hasSelected) {
+				particles[selected].print(selected);
+			}else {
+				selected = stoul(commands[i++].data());
+				if (selected < 0 || selected >= _nParticles) {
+					if (!wasPaused) simulator->resumeSimulation();
+					cout << "Invalid id" << endl;
+					return false;
+				}
+				particles[selected].print(selected);
+			}
+			if (!wasPaused) simulator->resumeSimulation();
+			return true;
+		}
+		if (command == string("edit")) {
+			simulator->pauseSimulation();
+			if (!hasSelected) {
+				selected = stoul(commands[i++].data());
+				if (selected < 0 || selected >= _nParticles) {
+					if (!wasPaused) simulator->resumeSimulation();
+					cout << "Invalid id" << endl;
+					return false;
+				}
+			}
+			enbody::Particle newPar = particles[selected];
+			double speed,x,y;
+			if (nargs>1) { //args given
+				while(i<nargs) {
+					command = commands[i++];
+					if (command == string("weight")) {
+						newPar.mass = atof(commands[i++].data());
+					}
+					if (command == string("speed")) {
+
+						speed = atof(commands[i++].data());
+						newPar.velocity = newPar.velocity.normalize() * speed;
+					}
+					if (command == string("direction")) {
+						x = atof(commands[i++].data());
+						y = atof(commands[i++].data());
+						newPar.velocity = vec2d(x,y);
+					}
+					if (command == string("position")) {
+						x = atof(commands[i++].data());
+						y = atof(commands[i++].data());
+						newPar.position = vec2d(x,y);
+					}
+					if (command == string("radius")) {
+						newPar.radius = atof(commands[i++].data());
+					}
+				}
+			}else {
+				cout << "Invalid command" << endl;
+				return false;
+			}
+			particles[selected] = newPar;
+			if (!wasPaused) simulator->resumeSimulation();
+			return true;
+		} //end edit
+		command = commands[i++];
+	}
+	return false;
+}
+
+bool parsescript(std::string file) {
+	std::fstream f;
+	try {
+		f.open(file,std::fstream::in);
+	}catch (std::exception * e) {
+		cout << "Failed to open " << file << endl <<
+				e->what() << endl;
+		return false;
+	}
+
+	unsigned int line = 0;
+	char buff[256];
+	while(!f.eof()) {
+		line++;
+		f.getline(buff, 256);
+		if (!parseCommand(buff))
+		{
+			printf("Error on line %i of %s", line, file.data());
+			f.close();
+			return false;
+		}
+		particles = simulator->particleArrayPointer;
+		nParticles = simulator->getNParticles();
+	}
+	f.close();
+
+	return true;
+
 
 }
 
+void parsecmdl(int narg, char** args) {
+	for(int i = 1; i < narg; i++) {
+		string cmd = args[i];
+		if (cmd== string("--script")){ // load [filename]
+			if (!parsescript(args[++i]))
+				exit(2);
+		}else
+		if (cmd==  string("--sol")){//start on load
+			simulator->resumeSimulation();
+		}else
+		if (cmd==  string("--speed")){ //set realtime fraction (--speed [rtf])
+			simulator->setRealtimeFraction(atof(args[++i]));
+		}else
+		if (cmd==  string("--dt")){ //set dt
+			simulator->setDT(atof(args[++i]));
+		}else
+		if (cmd== string("--help")){
+			cout << "Galaxy simulator ?v1.0?" << endl <<
+					"Commandline arguments:" << endl <<
+					"   --script filename" << endl <<
+					"       => loads file [filename] as linewise runtime commands" << endl <<
+					"   --sol => stars immediately after load" << endl <<
+					"   --speed realvalue => sets the speed to [realvalue] times the normal time" << endl <<
+					"   --dt realvalue => sets the timestep to [realvalue] in seconds" << endl;
+			exit(0);
+		}else{
+			cout << "Invalid input argument... type --help" << endl;
+			exit(2);
+
+		}
+	}
+}
+
+void cmdthread (bool * run) {
+	char buffer[256];
+	while (run) {
+		cout << ">";
+		cin.getline(buffer,256);
+		try {
+			if (!parseCommand(buffer))
+				cout << "invalid command" << endl;
+		}catch (std::exception * e) {
+			cout << e->what() << endl;
+		}
+	}
+}
+
 int main(int narg, char** args) {
-	using namespace std;
 	//init sim
 	//TODO: commandline init with variables
 	//	spread from origin (mean=0, alpha=?)
@@ -185,13 +552,14 @@ int main(int narg, char** args) {
 	//particles = simulator->enableReadBuffer();
 	particles = simulator->particleArrayPointer;
 
-	simulator->addParticles(30, 1000.0);
+	//simulator->addParticles(30, 1000.0);
 
 	//Init sim (start paused)
 	simulator->setRealtimeFraction(1);
 	simulator->pauseSimulation();
 	simulator->startSimulation();
 
+	parsecmdl(narg, args);
 
 	//Init openGL
 	glutInit(&narg, args);
@@ -212,8 +580,15 @@ int main(int narg, char** args) {
 
 	glViewport(0, 0, 800, 600);
 
+	//Start command processor
+	bool run = true;
+	std::thread cmdproc(cmdthread, &run);
+	cmdproc.detach();
+
 	//Start
 	glutMainLoop();
+	run = false;
+	cmdproc.~thread();
 
 	delete simulator;
 

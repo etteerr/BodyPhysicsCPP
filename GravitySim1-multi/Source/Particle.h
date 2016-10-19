@@ -23,6 +23,7 @@ class Particle {
 public:
 	Particle(double nMass, vec2<double> pos, double _radius);
 	Particle(double nMass, double x, double y, double _radius);
+	Particle();
 
 	//Getters and setters, each with their own mutex lock or a global one..
 	double getMass();
@@ -69,6 +70,25 @@ public:
 	 * Warning: No mutex locks used in this function, manual locks required
 	 */
 	void normalizePosition(); //Devides in sectors
+
+	void print(unsigned int id) {
+		vec2d dir = velocity / velocity.length();
+		printf("Particle %i:\n\t"
+				"mass:\t\t %.5f\n\t"
+				"radius:\t\t %.5f\n\t"
+				"position:\t (%.5f,%.5f)\n\t"
+				"direction:\t (%.5f,%.5f)\n\t"
+				"speed:\t\t %.5f\n",
+				id,
+				mass,
+				radius,
+				position.x,
+				position.y,
+				dir.x,
+				dir.y,
+				velocity.length()
+				);
+	}
 };
 
 } /* namespace enbody */
