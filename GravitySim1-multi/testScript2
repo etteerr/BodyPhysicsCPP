@@ -8,13 +8,7 @@ add weight 568000000000000000000000000 speed 9700 position 1433500000000 0 direc
 add weight 86800000000000000000000000 speed 6800 position 2872500000000 0 direction 0 1 radius 25559000
 add weight 102000000000000000000000000 speed 5400 position 4495100000000 0 direction 0 1 radius 24764000
 addlog 3
-pause
-setSpeed -1
+addlog 0
+setSpeed 10
+setzoom 1e-10
 resume
-wait for 126144000
-pause
-select 3
-edit weight 5969999999999999852800000
-resume
-wait for 126144000
-savelog

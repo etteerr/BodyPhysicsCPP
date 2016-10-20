@@ -16,7 +16,7 @@
 enbody::NbodySim * simulator;
 enbody::Particle * particles;
 unsigned int nParticles;
-
+unsigned long int maxTraceDraw = 500000; //30 to 40 ms rendertime
 //mouse move variables and setting
 static int sx;
 static int sy;
@@ -81,16 +81,20 @@ void drawTrace() {
 	glPointSize(1.0);
 	double x,y;
 	unsigned int csteps = simulator->getSimulatedSteps();
+	if (csteps > maxTraceDraw)
+		csteps = maxTraceDraw;
 	glBegin(GL_POINTS);
 	std::lock_guard<std::mutex> lock(simulator->loggerlock);
 	for(unsigned int j = 0; j < simulator->nLoggers; j++) {
-		int i = 0;
-		for(auto it = simulator->loggers[j].log.begin(); it != simulator->loggers[j].log.end(); it++) {
+		long unsigned int i = 0;
+		for(auto it = simulator->loggers[j].log.end(); it != simulator->loggers[j].log.begin(); it--) {
 			glColor3d((double)i/(double)csteps, 1.0-((double)i/(double)csteps), 0.0);
 			x = (*it).x;
 			y = (*it).y;
 			glVertex2d(zoom*(x-dx),zoom*(y-dy));
 			i++;
+			if (i >= maxTraceDraw)
+				break;
 		}
 	}
 	glEnd();
@@ -124,7 +128,7 @@ void display(void) {
 	sprintf(a,"SimSpeed %.8f  simstep: %i   dtDraw: %i    dtCalc: %.5f", simulator->getRealtimeFraction(), simulator->getSimulatedSteps(), (int)ms2.count(), simulator->getCalcTime());
 	printtext(10,30,a);
 	char str[64];
-	sprintf(str,"Zoom: %.8f  loc: %.2f:%.2f    time: %.5f", zoom, dx,dy,(double)simulator->getSimulatedSteps()*simulator->deltaT);
+	sprintf(str,"Zoom: %.10f  loc: %.2f:%.2f    time: %.5f", zoom, dx,dy,(double)simulator->getSimulatedSteps()*(double)simulator->deltaT);
 	printtext(10,10,str);
 	glFlush();
 	glFinish();
@@ -246,6 +250,15 @@ bool parseCommand(string incommands) {
 		return false;
 	}
 
+	if (command == string("setzoom"))
+		{
+			if (nargs == 2){
+				zoom = atof(commands[i++].data());
+				return true;
+			}
+			return false;
+		}
+
 	if (command == string("wait")) { //wait in seconds  (simulator time)
 		command = commands[i++];
 		if (command == string("until")) { //wait until simulator time
@@ -276,9 +289,12 @@ bool parseCommand(string incommands) {
 		exit(0);//TODO: Dont do this
 	}
 	if (command == string("savelog")) {
+		if (nargs != 2)
+			return false;
 		simulator->pauseSimulation();
 		fstream f;
-		f.open("logger.csv", fstream::out | fstream::app);
+		f.open(commands[i++].data(), fstream::out | fstream::app);
+		f.precision(std::numeric_limits<long double>::digits10);
 		for(unsigned int i = 0; i < simulator->nLoggers; i++) {
 			f << simulator->loggers[i].id << ";";
 		}
@@ -309,22 +325,22 @@ bool parseCommand(string incommands) {
 			while(i < nargs) {
 				command = commands[i++];
 				if (command == string("weight")) {
-					newPar.mass = atof(commands[i++].data());
+					newPar.mass = strtold(commands[i++].data(),0);
 				}
 				if (command == string("speed")) {
 
-					speed = atof(commands[i++].data());
+					speed = strtold(commands[i++].data(),0);
 				}
 				if (command == string("direction")) {
-					x = atof(commands[i++].data());
-					y = atof(commands[i++].data());
+					x = strtold(commands[i++].data(),0);
+					y = strtold(commands[i++].data(),0);
 				}
 				if (command == string("position")) {
-					px = atof(commands[i++].data());
-					py = atof(commands[i++].data());
+					px = strtold(commands[i++].data(),0);
+					py = strtold(commands[i++].data(),0);
 				}
 				if (command == string("radius")) {
-					newPar.radius = atof(commands[i++].data());
+					newPar.radius = strtold(commands[i++].data(),0);
 				}
 			}
 
@@ -390,9 +406,17 @@ bool parseCommand(string incommands) {
 		return true;
 	}
 	if (command == string("setSpeed")) {
+		if (nargs != 2)
+			return false;
 		double speed;
 		speed = atof(commands[i++].data());
 		simulator->setRealtimeFraction(speed);
+		return true;
+	}
+	if (command == string("settracelength")) {
+		if (nargs != 2)
+			return false;
+		maxTraceDraw = atol(commands[i++].data());
 		return true;
 	}
 	//Command parsing 	(may be used as command [particle] [args]
@@ -434,25 +458,25 @@ bool parseCommand(string incommands) {
 				while(i<nargs) {
 					command = commands[i++];
 					if (command == string("weight")) {
-						newPar.mass = atof(commands[i++].data());
+						newPar.mass = strtold(commands[i++].data(),0);
 					}
 					if (command == string("speed")) {
 
-						speed = atof(commands[i++].data());
+						speed = strtold(commands[i++].data(),0);
 						newPar.velocity = newPar.velocity.normalize() * speed;
 					}
 					if (command == string("direction")) {
-						x = atof(commands[i++].data());
-						y = atof(commands[i++].data());
+						x = strtold(commands[i++].data(),0);
+						y = strtold(commands[i++].data(),0);
 						newPar.velocity = vec2d(x,y);
 					}
 					if (command == string("position")) {
-						x = atof(commands[i++].data());
-						y = atof(commands[i++].data());
+						x = strtold(commands[i++].data(),0);
+						y = strtold(commands[i++].data(),0);
 						newPar.position = vec2d(x,y);
 					}
 					if (command == string("radius")) {
-						newPar.radius = atof(commands[i++].data());
+						newPar.radius = strtold(commands[i++].data(),0);
 					}
 				}
 			}else {
@@ -513,7 +537,7 @@ void parsecmdl(int narg, char** args) {
 			simulator->setRealtimeFraction(atof(args[++i]));
 		}else
 		if (cmd==  string("--dt")){ //set dt
-			simulator->setDT(atof(args[++i]));
+			simulator->setDT(strtold(args[++i],0));
 		}else
 		if (cmd== string("--help")){
 			cout << "Galaxy simulator ?v1.0?" << endl <<

@@ -17,7 +17,7 @@ std::shared_timed_mutex vwrite;
 std::shared_timed_mutex pwrite;
 std::shared_timed_mutex fwrite;
 
-Particle::Particle(double nMass, vec2<double> pos, double _radius){
+Particle::Particle(double nMass, vec2d pos, double _radius){
 	mass = nMass;
 	position = pos;
 	radius = _radius;
@@ -43,8 +43,8 @@ double Particle::getMass() {
 	return mass;
 }
 
-vec2<double> Particle::getPosition() {
-	vec2<double> tmp;
+vec2d Particle::getPosition() {
+	vec2d tmp;
 	std::shared_lock<std::shared_timed_mutex> lock(pwrite);
 	tmp = this->position;
 	lock.unlock();
@@ -71,33 +71,33 @@ void Particle::step() {
 	return;
 }
 
-vec2<double> Particle::getVelocity() {
+vec2d Particle::getVelocity() {
 	std::shared_lock<std::shared_timed_mutex> lock(vwrite);
-	vec2<double> tmp = this->velocity;
+	vec2d tmp = this->velocity;
 	lock.unlock();
 	return tmp;
 
 }
 
-vec2<double> Particle::getForce() {
+vec2d Particle::getForce() {
 	std::shared_lock<std::shared_timed_mutex> lock(fwrite);
-	vec2<double> tmp = force;
+	vec2d tmp = force;
 	lock.unlock();
 	return tmp;
 }
 
-void Particle::setForce(vec2<double>& nForce) {
+void Particle::setForce(vec2d& nForce) {
 	std::lock_guard<std::shared_timed_mutex> lock(fwrite);
 	this->force = nForce;
 }
 
-void Particle::addForce(vec2<double>& aForce) {
+void Particle::addForce(vec2d& aForce) {
 	std::lock_guard<std::shared_timed_mutex> lock(fwrite);
 	this->force += aForce;
 }
 
 //Private
-void Particle::setVelocity(vec2<double>& vel) {
+void Particle::setVelocity(vec2d& vel) {
 	std::lock_guard<std::shared_timed_mutex> lock(vwrite);
 	this->velocity = vel;
 }
@@ -109,21 +109,21 @@ void Particle::setForce(double x, double y) {
 }
 
 //Private
-void Particle::addVelocity(vec2<double>& vel) {
+void Particle::addVelocity(vec2d& vel) {
 	std::lock_guard<std::shared_timed_mutex> lock(vwrite);
 	this->velocity += vel;
 }
 
-vec2<double> Particle::getSector() {
-	vec2<double> tmp;
+vec2d Particle::getSector() {
+	vec2d tmp;
 	std::shared_lock<std::shared_timed_mutex> lock(pwrite);
 	tmp = sector;
 	lock.unlock();
 	return tmp;
 }
 
-vec2<double> Particle::getNormPosition() {
-	vec2<double> tmp;
+vec2d Particle::getNormPosition() {
+	vec2d tmp;
 	std::shared_lock<std::shared_timed_mutex> lock(pwrite);
 	tmp = sector;
 	tmp += position;
@@ -133,7 +133,7 @@ vec2<double> Particle::getNormPosition() {
 
 void Particle::addForce(double x, double y) {
 	std::lock_guard<std::shared_timed_mutex> lock(fwrite);
-	force += vec2<double>(x, y);
+	force += vec2d(x, y);
 }
 
 
@@ -162,7 +162,7 @@ double Particle::getDistance(Particle& p) {
 	return sqrt(pow(p.position.x - position.x,2)+pow(p.position.y - position.y,2));
 }
 
-vec2<double> Particle::calcForce(Particle& p) {
+vec2d Particle::calcForce(Particle& p) {
 	double f = (G * mass * p.mass)/pow(getDistance(p) ,2);
 	vec2d v = position.direction(p.position);
 	return v*f;

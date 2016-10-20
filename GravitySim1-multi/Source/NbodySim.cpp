@@ -14,7 +14,7 @@
 #include <time.h>
 #include <iostream>
 namespace enbody {
-double NbodySim::deltaT = 0;
+long double NbodySim::deltaT = 0;
 
 #define G 0.0000000000667
 /************************************
@@ -213,7 +213,7 @@ void enbody::NbodySim::addParticles(unsigned int nParticles, double locscale, ve
 	}
 }
 
-void enbody::NbodySim::addParticles(vec2<double> min, vec2<double> max,
+void enbody::NbodySim::addParticles(vec2d min, vec2d max,
 		int nParticles) {
 }
 
@@ -475,7 +475,7 @@ void NbodySim::simloop() {
 			std::this_thread::yield();
 		}
 		if (this->realtimeFraction >= 0) {
-			long int sleept = (long int)((deltaT/realtimeFraction)*1000000000)-(long int)dt.count();
+			long int sleept = ((long int)((double)deltaT/realtimeFraction)*1000000000)-(long int)dt.count();
 			std::chrono::duration<int, std::nano> sleeptime = std::chrono::duration<int, std::nano>(sleept);
 			//std::cout << "sleept: " << dt.count() << std::endl;
 			//std::cout << "sleep: " << sleeptime.count() << std::endl;

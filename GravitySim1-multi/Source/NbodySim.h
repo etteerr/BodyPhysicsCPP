@@ -47,7 +47,7 @@ class NbodySim {
 public:
 
 	// Simulation Parameters
-	static double deltaT;
+	static long double deltaT;
 
 	/**
 	 * Initializes the simulator with an initial space of 1024 particles
@@ -160,7 +160,7 @@ public:
 	/**
 	 * addParticles(int n)
 	 * Adds n particles in current WorkingSector at random locations
-	 * Uses addParticle(vec2<double> pos, Particle particle)
+	 * Uses addParticle(vec2d pos, Particle particle)
 	 * Particles are generated with random weights based on the global mean weight +- sd
 	 * Idem for size
 	 */
@@ -168,11 +168,11 @@ public:
 	/**
 	 * Adds particles in a bound region between min and max where
 	 * 	0 < min < max && min < max < 1
-	 * Uses addParticle(vec2<double> pos, Particle particle)
+	 * Uses addParticle(vec2d pos, Particle particle)
 	 * Particles are generated with random weights based on the global mean weight +- sd
 	 * Idem for size
 	 */
-	void addParticles(vec2<double> min, vec2<double> max, int);
+	void addParticles(vec2d min, vec2d max, int);
 	/**
 	 * Particle particle is added at position pos and sector 'workingSector'
 	 * Idem for size

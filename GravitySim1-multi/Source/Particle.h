@@ -21,7 +21,7 @@ namespace enbody {
 // This remains locked across function calls
 class Particle {
 public:
-	Particle(double nMass, vec2<double> pos, double _radius);
+	Particle(double nMass, vec2d pos, double _radius);
 	Particle(double nMass, double x, double y, double _radius);
 	Particle();
 
@@ -30,20 +30,20 @@ public:
 	/**
 	 * Returns relative to sector
 	 */
-	vec2<double> getPosition();	//Position is only set by this class (step and normalizePos..)
-	vec2<double> getVelocity(); //Velocity is only set by this class (step)
-	vec2<double> getForce();
-	vec2<double> getSector();
+	vec2d getPosition();	//Position is only set by this class (step and normalizePos..)
+	vec2d getVelocity(); //Velocity is only set by this class (step)
+	vec2d getForce();
+	vec2d getSector();
 	double 		 getRadius();
 	double		 getDistance(Particle& p);
-	vec2<double> calcForce(Particle& p);
+	vec2d calcForce(Particle& p);
 	/**
 	 * returns relative to origin (less accurate)
 	 */
-	vec2<double> getNormPosition(); //returns
-	void setForce(vec2<double>&);
+	vec2d getNormPosition(); //returns
+	void setForce(vec2d&);
 	void setForce(double x, double y);
-	void addForce(vec2<double>&);
+	void addForce(vec2d&);
 	void addForce(double x, double y);
 	void addForce(Particle&);
 
@@ -54,15 +54,15 @@ public:
 	//Variable
 	double mass;
 	double radius;
-	vec2<double> position;
-	vec2<double> velocity;
-	vec2<double> force;
-	vec2<double> sector;
+	vec2d position;
+	vec2d velocity;
+	vec2d force;
+	vec2d sector;
 	//std::mutex m_lock;
 
 	//Private setters
-	void setVelocity(vec2<double>&);
-	void addVelocity(vec2<double>&);
+	void setVelocity(vec2d&);
+	void addVelocity(vec2d&);
 
 	//private fun
 	/**

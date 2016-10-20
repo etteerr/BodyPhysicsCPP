@@ -138,7 +138,7 @@ public:
 	}
 
 	vec2 direction(vec2& that) {
-		vec2<double> direction;
+		vec2 direction;
 		double r = dist(that);
 		direction.x = (that.x - x)/r;
 		direction.y = (that.y - y)/r;
@@ -148,7 +148,7 @@ public:
 };
 
 typedef vec2<float> vec2f;
-typedef vec2<double> vec2d;
+typedef vec2<long double> vec2d;
 
 
 #endif
