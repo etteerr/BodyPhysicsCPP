@@ -84,7 +84,6 @@ void drawTrace() {
 	unsigned int csteps = simulator->getSimulatedSteps();
 	if (csteps > maxTraceDraw)
 		csteps = maxTraceDraw;
-	csteps /= skipNTraceDraw;
 	glBegin(GL_POINTS);
 	std::lock_guard<std::mutex> lock(simulator->loggerlock);
 	for(unsigned int j = 0; j < simulator->nLoggers; j++) {
@@ -423,12 +422,16 @@ bool parseCommand(string incommands) {
 		if (nargs != 2)
 			return false;
 		maxTraceDraw = atol(commands[i++].data());
+		if (maxTraceDraw < 0)
+			maxTraceDraw = 0;
 		return true;
 	}
 	if (command == string("settraceskip")) {
 		if (nargs != 2)
 			return false;
 		skipNTraceDraw = atoi(commands[i++].data());
+		if (skipNTraceDraw < 1)
+			skipNTraceDraw = 1;
 		return true;
 	}
 	//Command parsing 	(may be used as command [particle] [args]
