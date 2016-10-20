@@ -453,11 +453,10 @@ void NbodySim::simloop() {
 
 		//queue operations
 		queueForce();
+		helpUpdate();
 		queueCollision();
+		helpUpdate();
 		queueStep();
-
-
-		//Help work
 		helpUpdate();
 
 		//update loggers
