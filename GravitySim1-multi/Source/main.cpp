@@ -294,8 +294,11 @@ bool parseCommand(string incommands) {
 		exit(0);//TODO: Dont do this
 	}
 	if (command == string("savelog")) {
-		if (nargs != 2)
+		if (nargs != 2 || nargs != 3)
 			return false;
+		int skipLines = 0;
+		if (nargs == 3)
+			skipLines = atoi(commands[i++].data());
 		simulator->pauseSimulation();
 		fstream f;
 		f.open(commands[i++].data(), fstream::out | fstream::app);
@@ -305,10 +308,12 @@ bool parseCommand(string incommands) {
 		}
 		f << endl;
 		for (unsigned int j = 0; j < simulator->getSimulatedSteps(); j++) {
-			for(unsigned int i = 0; i < simulator->nLoggers; i++) {
-				f << simulator->loggers[i].log[j].x << "-" << simulator->loggers[i].log[j].y << ";";
+			if (j%skipLines == 0) {
+				for(unsigned int i = 0; i < simulator->nLoggers; i++) {
+					f << simulator->loggers[i].log[j].x << "-" << simulator->loggers[i].log[j].y << ";";
+				}
+				f << endl;
 			}
-			f << endl;
 		}
 		f.close();
 		if (!wasPaused) simulator->resumeSimulation();
