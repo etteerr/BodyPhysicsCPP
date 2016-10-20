@@ -17,6 +17,7 @@ enbody::NbodySim * simulator;
 enbody::Particle * particles;
 unsigned int nParticles;
 unsigned long int maxTraceDraw = 500000; //30 to 40 ms rendertime
+unsigned int skipNTraceDraw = 100;
 //mouse move variables and setting
 static int sx;
 static int sy;
@@ -83,16 +84,21 @@ void drawTrace() {
 	unsigned int csteps = simulator->getSimulatedSteps();
 	if (csteps > maxTraceDraw)
 		csteps = maxTraceDraw;
+	csteps /= skipNTraceDraw;
 	glBegin(GL_POINTS);
 	std::lock_guard<std::mutex> lock(simulator->loggerlock);
 	for(unsigned int j = 0; j < simulator->nLoggers; j++) {
 		long unsigned int i = 0;
+		long unsigned int td = 0;
 		for(auto it = simulator->loggers[j].log.end(); it != simulator->loggers[j].log.begin(); it--) {
-			glColor3d((double)i/(double)csteps, 1.0-((double)i/(double)csteps), 0.0);
-			x = (*it).x;
-			y = (*it).y;
-			glVertex2d(zoom*(x-dx),zoom*(y-dy));
-			i++;
+			if (td % skipNTraceDraw == 0) {
+				glColor3d((double)i/(double)csteps, 1.0-((double)i/(double)csteps), 0.0);
+				x = (*it).x;
+				y = (*it).y;
+				glVertex2d(zoom*(x-dx),zoom*(y-dy));
+				i++;
+			}
+			td++;
 			if (i >= maxTraceDraw)
 				break;
 		}
@@ -417,6 +423,12 @@ bool parseCommand(string incommands) {
 		if (nargs != 2)
 			return false;
 		maxTraceDraw = atol(commands[i++].data());
+		return true;
+	}
+	if (command == string("settraceskip")) {
+		if (nargs != 2)
+			return false;
+		skipNTraceDraw = atoi(commands[i++].data());
 		return true;
 	}
 	//Command parsing 	(may be used as command [particle] [args]
