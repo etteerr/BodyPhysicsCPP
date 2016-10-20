@@ -475,43 +475,43 @@ bool parseCommand(string incommands) {
 					return false;
 				}
 			}
-			enbody::Particle newPar = particles[selected];
+			enbody::Particle* newPar = &particles[selected];
 			double speed,x,y;
 			if (nargs>1) { //args given
 				while(i<nargs) {
 					command = commands[i++];
 					if (command == string("weight")) {
-						newPar.mass = strtold(commands[i++].data(),0);
+						newPar->mass = strtold(commands[i++].data(),0);
 					}
 					if (command == string("speed")) {
 
 						speed = strtold(commands[i++].data(),0);
-						newPar.velocity = newPar.velocity.normalize() * speed;
+						newPar->velocity = newPar->velocity.getnormalize() * speed;
 					}
 					if (command == string("direction")) {
 						x = strtold(commands[i++].data(),0);
 						y = strtold(commands[i++].data(),0);
-						newPar.velocity = vec2d(x,y);
+						newPar->velocity = vec2d(x,y);
 					}
 					if (command == string("position")) {
 						x = strtold(commands[i++].data(),0);
 						y = strtold(commands[i++].data(),0);
-						newPar.position = vec2d(x,y);
+						newPar->position = vec2d(x,y);
 					}
 					if (command == string("radius")) {
-						newPar.radius = strtold(commands[i++].data(),0);
+						newPar->radius = strtold(commands[i++].data(),0);
 					}
 				}
 			}else {
 				cout << "Invalid command" << endl;
 				return false;
 			}
-			particles[selected] = newPar;
+			//particles[selected] = newPar;
 			if (!wasPaused) simulator->resumeSimulation();
 			return true;
 		} //end edit
 		command = commands[i++];
-	}
+	}//end while
 	return false;
 }
 
